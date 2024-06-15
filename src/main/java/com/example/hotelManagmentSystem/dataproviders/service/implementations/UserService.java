@@ -6,6 +6,7 @@ import com.example.hotelManagmentSystem.dataproviders.dto.request.RegisterReques
 import com.example.hotelManagmentSystem.dataproviders.dto.response.AuthenticationResponse;
 import com.example.hotelManagmentSystem.dataproviders.dto.response.ClientAuthResponse;
 import com.example.hotelManagmentSystem.dataproviders.entity.*;
+import com.example.hotelManagmentSystem.dataproviders.repository.AddressRepository;
 import com.example.hotelManagmentSystem.dataproviders.repository.ClientLogRepository;
 import com.example.hotelManagmentSystem.dataproviders.repository.RoleRepository;
 import com.example.hotelManagmentSystem.dataproviders.repository.UserRepository;
@@ -23,7 +24,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

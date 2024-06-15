@@ -23,6 +23,7 @@ public class BookRequest {
     private LocalDate CheckOut;
     private double netValue;
     private double discount;
+    private double totalAfterTax;
     private String nameOnCard;
     private String numberOnCard;
     private String expireCard;

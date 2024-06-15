@@ -60,4 +60,17 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(resourceException,HttpStatus.NOT_ACCEPTABLE);
     }
 
+
+    @ExceptionHandler(BookingException.class)
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    public ResponseEntity<ResourceException> handleBookingRequestException(
+            BookingException bookingException
+    ){
+        ResourceException resourceException = ResourceException.builder()
+                .message(bookingException.getMessage())
+                .build();
+
+        return new ResponseEntity<>(resourceException,HttpStatus.NOT_ACCEPTABLE);
+    }
+
 }

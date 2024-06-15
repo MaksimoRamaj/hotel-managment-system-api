@@ -53,4 +53,7 @@ public class Reservation {
     @Column(name = "created_at")
     private LocalDate createdAt;
 
+    @Column(name = "total")
+    private Double total;
+
 }

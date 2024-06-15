@@ -2,6 +2,7 @@ package com.example.hotelManagmentSystem.endpoints.controller;
 
 import com.example.hotelManagmentSystem.dataproviders.dto.request.BookRequest;
 import com.example.hotelManagmentSystem.dataproviders.service.implementations.JwtService;
+import com.example.hotelManagmentSystem.dataproviders.service.interfaces.IReservationService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReservationController {
 
     private final JwtService jwtService;
+    private final IReservationService reservationService;
 
     @PostMapping
     public ResponseEntity<?> book(@RequestBody BookRequest request,
@@ -25,8 +27,9 @@ public class ReservationController {
         String authHeader = httpServletRequest.getHeader("Authorization");
         String jwtToken = authHeader.substring(7);
         String userEmail = jwtService.extractUsername(jwtToken);
+
         return new ResponseEntity<>(
-               request , HttpStatus.ACCEPTED
+                reservationService.book(request,userEmail), HttpStatus.ACCEPTED
         );
     }
 }
