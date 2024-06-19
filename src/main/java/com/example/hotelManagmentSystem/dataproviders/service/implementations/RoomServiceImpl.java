@@ -72,7 +72,7 @@ public class RoomServiceImpl implements IRoomService {
 
     @Override
     public Set<RoomResponse> getRoomByHotelId(Integer hotelId,AvailabilityRequest request) {
-        List<Room> rooms = roomRepository.findAvailableRooms(request.getCheckIn(),
+        Set<Room> rooms = roomRepository.findAvailableRooms(request.getCheckIn(),
                 request.getCheckOut(),
                 request.getAdult(),
                 request.getKids());
@@ -85,7 +85,7 @@ public class RoomServiceImpl implements IRoomService {
 
     @Override
     public Set<RoomResponse> findAvailableRooms(AvailabilityRequest request) {
-        List<Room> rooms = roomRepository.findAvailableRooms(request.getCheckIn(),
+        Set<Room> rooms = roomRepository.findAvailableRooms(request.getCheckIn(),
                 request.getCheckOut(),
                 request.getAdult(),
                 request.getKids());

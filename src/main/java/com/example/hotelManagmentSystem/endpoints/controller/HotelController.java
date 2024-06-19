@@ -9,6 +9,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,6 +19,7 @@ public class HotelController {
 
     private final IHotelService hotelService;
     private final JwtService jwtService;
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/add")
     public ResponseEntity<?> addHotel(@RequestBody AddHotelRequest request,
                                       @NonNull HttpServletRequest httpServletRequest){
@@ -36,6 +38,7 @@ public class HotelController {
         );
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/all-by-user")
     public ResponseEntity<?> getAllByUserId(@NonNull HttpServletRequest httpServletRequest){
         String authHeader = httpServletRequest.getHeader("Authorization");

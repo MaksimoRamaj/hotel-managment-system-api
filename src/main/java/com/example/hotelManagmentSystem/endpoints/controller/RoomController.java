@@ -29,7 +29,7 @@ public class RoomController {
                 ,HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/{hotelId}")
+    @PostMapping("/available/{hotelId}")
     public ResponseEntity<?> getRoomByHotelId(@PathVariable Integer hotelId,
                                               @RequestBody AvailabilityRequest request){
         return new ResponseEntity<>(

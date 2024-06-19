@@ -16,4 +16,5 @@ public class HotelResponse {
     private String description;
     private int noOfRooms;
     private Set<HotelServiceResponse> hotelServices;
+    private Set<ImageResponse> images;
 }

@@ -29,7 +29,4 @@ public class RoomImage {
     @Column(name = "url", length = Integer.MAX_VALUE)
     private String url;
 
-    @Column(name = "description", length = Integer.MAX_VALUE)
-    private String description;
-
 }

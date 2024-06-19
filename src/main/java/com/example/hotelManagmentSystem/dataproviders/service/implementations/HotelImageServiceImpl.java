@@ -3,6 +3,7 @@ package com.example.hotelManagmentSystem.dataproviders.service.implementations;
 import com.example.hotelManagmentSystem.dataproviders.entity.Hotel;
 import com.example.hotelManagmentSystem.dataproviders.entity.HotelImage;
 import com.example.hotelManagmentSystem.dataproviders.repository.HotelImageRepository;
+import com.example.hotelManagmentSystem.dataproviders.repository.HotelRepository;
 import com.example.hotelManagmentSystem.dataproviders.service.interfaces.IHotelImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,10 +19,14 @@ import java.util.Optional;
 public class HotelImageServiceImpl implements IHotelImageService {
 
     private final HotelImageRepository hotelImageRepository;
-    private final String FOLDER_PATH = "C:\\Users\\USER\\Downloads\\hotelManagmentSystem\\hotelManagmentSystem\\src\\main\\resources\\images\\";
+    private final HotelRepository hotelRepository;
+    private final String FOLDER_PATH = "C:\\Users\\USER\\OneDrive\\Desktop\\hotelManagmentSystem\\src\\main\\resources\\images\\";
 
     public String uploadImageToFileSystem(MultipartFile multipartFile,
-                                          Hotel hotel,String description) throws IOException {
+                                          Integer hotelId) throws IOException {
+
+        Hotel hotel = hotelRepository.findById(hotelId).get();
+
         String file_path = FOLDER_PATH + multipartFile.getOriginalFilename();
 
         //ruaj ne db pathin e file dhe type
@@ -31,7 +36,6 @@ public class HotelImageServiceImpl implements IHotelImageService {
                         .type(multipartFile.getContentType())
                         .url(file_path)
                         .hotel(hotel)
-                        .description(description)
                         .build());
 
         //kalo filen ne filesystem

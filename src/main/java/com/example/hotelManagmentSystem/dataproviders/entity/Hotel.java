@@ -19,7 +19,7 @@ public class Hotel {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "admin_id")
     private User admin;
 
@@ -37,5 +37,8 @@ public class Hotel {
 
     @Column(name = "tax_rate")
     private Double taxRate;
+
+    @OneToMany(mappedBy = "hotel")
+    private Set<Room> rooms = new LinkedHashSet<>();
 
 }

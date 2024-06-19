@@ -7,6 +7,5 @@ import java.io.IOException;
 
 public interface IHotelImageService {
      byte[] downloadImageFromFileSystem(String fileName) throws IOException;
-     String uploadImageToFileSystem(MultipartFile multipartFile, Hotel hotel,
-                                    String desc) throws IOException;
+     String uploadImageToFileSystem(MultipartFile multipartFile, Integer hotel) throws IOException;
 }
