@@ -3,7 +3,10 @@
   <component name="JpaBuddyIdeaProjectConfig" newRepositoryParent="org.springframework.data.jpa.repository.JpaRepository">
     <option name="defaultUnitInitialized" value="true" />
     <option name="renamerInitialized" value="true" />
-    <option name="reverseEngineeringLastDbConnectionId" value="8fa3f65d-d4ee-4202-b268-5d16bea58f19__hotel_manag_public" />
+    <option name="isSnapshotDb" value="false" />
+    <option name="snapshotDbValue" value="8fa3f65d-d4ee-4202-b268-5d16bea58f19" />
+    <option name="snapshotModelValue" value="Default" />
+    <option name="reverseEngineeringLastDbConnectionId" value="e2a89fdc-b663-43a0-b734-00cc6d209bd4__hotel_v2_public" />
     <option name="reLastEntityCreationPackage" value="src/main/java/com/example/hotelManagmentSystem/dataproviders/entity" />
   </component>
 </project>

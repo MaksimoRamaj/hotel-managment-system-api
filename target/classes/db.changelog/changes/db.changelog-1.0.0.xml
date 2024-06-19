@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+    http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd ">
+
+    <changeSet id="13" author="maksi">
+        <createTable tableName="address">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_address"/>
+            </column>
+            <column name="street" type="text"/>
+            <column name="city" type="text"/>
+            <column name="state" type="text"/>
+            <column name="zip_code" type="INT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="14" author="maksi">
+        <createTable tableName="client_log">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_client_log"/>
+            </column>
+            <column name="client_id" type="INT"/>
+            <column name="total_reservations" type="INT"/>
+            <column name="score" type="DOUBLE"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="15" author="maksi">
+        <createTable tableName="hotel">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_hotel"/>
+            </column>
+            <column name="admin_id" type="INT"/>
+            <column name="name" type="text"/>
+            <column name="address" type="INT"/>
+            <column name="description" type="text"/>
+            <column name="tax_rate" type="DOUBLE"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="16" author="maksi">
+        <createTable tableName="hotel_images">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_hotel_images"/>
+            </column>
+            <column name="hotel_id" type="INT"/>
+            <column name="name" type="text"/>
+            <column name="type" type="text"/>
+            <column name="url" type="text"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="17" author="maksi">
+        <createTable tableName="hotel_service">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_hotel_service"/>
+            </column>
+            <column name="hotel_id" type="INT"/>
+            <column name="service_id" type="INT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="18" author="maksi">
+        <createTable tableName="reservation">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_reservation"/>
+            </column>
+            <column name="hotel_id" type="INT"/>
+            <column name="client_id" type="INT"/>
+            <column name="room_id" type="INT"/>
+            <column name="check_in" type="DATE"/>
+            <column name="check_out" type="DATE"/>
+            <column name="adults" type="INT"/>
+            <column name="kids" type="INT"/>
+            <column name="net_value" type="DOUBLE"/>
+            <column name="tax_rate" type="DOUBLE"/>
+            <column name="discount" type="DOUBLE"/>
+            <column name="created_at" type="DATE"/>
+            <column name="total" type="DOUBLE"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="19" author="maksi">
+        <createTable tableName="role">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_role"/>
+            </column>
+            <column name="name" type="text"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20" author="maksi">
+        <createTable tableName="room">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_room"/>
+            </column>
+            <column name="hotel_id" type="INT"/>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="adult" type="INT"/>
+            <column name="kids" type="INT"/>
+            <column name="description" type="text"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="21" author="maksi">
+        <createTable tableName="room_images">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_room_images"/>
+            </column>
+            <column name="room_id" type="INT"/>
+            <column name="name" type="text"/>
+            <column name="type" type="text"/>
+            <column name="url" type="text"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="22" author="maksi">
+        <createTable tableName="room_price">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_room_price"/>
+            </column>
+            <column name="room_id" type="INT"/>
+            <column name="price" type="DOUBLE"/>
+            <column name="day" type="SMALLINT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="23" author="maksi">
+        <createTable tableName="service">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_service"/>
+            </column>
+            <column name="name" type="text"/>
+            <column name="description" type="text"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="24" author="maksi">
+        <createTable tableName="user">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_user"/>
+            </column>
+            <column name="username" type="text"/>
+            <column name="email" type="text"/>
+            <column name="password" type="text"/>
+            <column name="role" type="INT"/>
+            <column name="firstname" type="text"/>
+            <column name="lastname" type="text"/>
+            <column name="address_id" type="INT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1" author="maksi">
+        <createSequence incrementBy="50" sequenceName="address_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="2" author="maksi">
+        <createSequence incrementBy="50" sequenceName="client_log_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="3" author="maksi">
+        <createSequence incrementBy="50" sequenceName="hotel_images_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="4" author="maksi">
+        <createSequence incrementBy="50" sequenceName="hotel_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="5" author="maksi">
+        <createSequence incrementBy="50" sequenceName="hotel_service_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="6" author="maksi">
+        <createSequence incrementBy="50" sequenceName="reservation_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="7" author="maksi">
+        <createSequence incrementBy="50" sequenceName="role_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="8" author="maksi">
+        <createSequence incrementBy="50" sequenceName="room_images_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="9" author="maksi">
+        <createSequence incrementBy="50" sequenceName="room_price_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="10" author="maksi">
+        <createSequence incrementBy="50" sequenceName="room_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="11" author="maksi">
+        <createSequence incrementBy="50" sequenceName="service_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="12" author="maksi">
+        <createSequence incrementBy="50" sequenceName="user_seq" startValue="1"/>
+    </changeSet>
+
+    <changeSet id="25" author="maksi">
+        <addUniqueConstraint columnNames="client_id" constraintName="uc_client_log_client" tableName="client_log"/>
+    </changeSet>
+    <changeSet id="26" author="maksi">
+        <addForeignKeyConstraint baseColumnNames="client_id" baseTableName="client_log"
+                                 constraintName="FK_CLIENT_LOG_ON_CLIENT" referencedColumnNames="id"
+                                 referencedTableName="user"/>
+    </changeSet>
+    <changeSet id="27" author="maksi">
+        <addForeignKeyConstraint baseColumnNames="hotel_id" baseTableName="hotel_images"
+                                 constraintName="FK_HOTEL_IMAGES_ON_HOTEL" referencedColumnNames="id"
+                                 referencedTableName="hotel"/>
+    </changeSet>
+    <changeSet id="28" author="maksi">
+        <addForeignKeyConstraint baseColumnNames="admin_id" baseTableName="hotel" constraintName="FK_HOTEL_ON_ADMIN"
+                                 referencedColumnNames="id" referencedTableName="user"/>
+    </changeSet>
+    <changeSet id="29" author="maksi">
+        <addForeignKeyConstraint baseColumnNames="hotel_id" baseTableName="hotel_service"
+                                 constraintName="FK_HOTEL_SERVICE_ON_HOTEL" referencedColumnNames="id"
+                                 referencedTableName="hotel"/>
+    </changeSet>
+    <changeSet id="30" author="maksi">
+        <addForeignKeyConstraint baseColumnNames="service_id" baseTableName="hotel_service"
+                                 constraintName="FK_HOTEL_SERVICE_ON_SERVICE" referencedColumnNames="id"
+                                 referencedTableName="service"/>
+    </changeSet>
+    <changeSet id="31" author="maksi">
+        <addForeignKeyConstraint baseColumnNames="client_id" baseTableName="reservation"
+                                 constraintName="FK_RESERVATION_ON_CLIENT" referencedColumnNames="id"
+                                 referencedTableName="user"/>
+    </changeSet>
+    <changeSet id="32" author="maksi">
+        <addForeignKeyConstraint baseColumnNames="hotel_id" baseTableName="reservation"
+                                 constraintName="FK_RESERVATION_ON_HOTEL" referencedColumnNames="id"
+                                 referencedTableName="hotel"/>
+    </changeSet>
+    <changeSet id="33" author="maksi">
+        <addForeignKeyConstraint baseColumnNames="room_id" baseTableName="reservation"
+                                 constraintName="FK_RESERVATION_ON_ROOM" referencedColumnNames="id"
+                                 referencedTableName="room"/>
+    </changeSet>
+    <changeSet id="34" author="maksi">
+        <addForeignKeyConstraint baseColumnNames="room_id" baseTableName="room_images"
+                                 constraintName="FK_ROOM_IMAGES_ON_ROOM" referencedColumnNames="id"
+                                 referencedTableName="room"/>
+    </changeSet>
+    <changeSet id="35" author="maksi">
+        <addForeignKeyConstraint baseColumnNames="hotel_id" baseTableName="room" constraintName="FK_ROOM_ON_HOTEL"
+                                 referencedColumnNames="id" referencedTableName="hotel"/>
+    </changeSet>
+    <changeSet id="36" author="maksi">
+        <addForeignKeyConstraint baseColumnNames="room_id" baseTableName="room_price"
+                                 constraintName="FK_ROOM_PRICE_ON_ROOM" referencedColumnNames="id"
+                                 referencedTableName="room"/>
+    </changeSet>
+    <changeSet id="37" author="maksi">
+        <addForeignKeyConstraint baseColumnNames="address_id" baseTableName="user" constraintName="FK_USER_ON_ADDRESS"
+                                 referencedColumnNames="id" referencedTableName="address"/>
+    </changeSet>
+    <changeSet id="38" author="maksi">
+        <addForeignKeyConstraint baseColumnNames="role" baseTableName="user" constraintName="FK_USER_ON_ROLE"
+                                 referencedColumnNames="id" referencedTableName="role"/>
+    </changeSet>
+
+
+</databaseChangeLog>

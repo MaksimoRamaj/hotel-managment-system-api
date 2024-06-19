@@ -2,6 +2,23 @@ package com.example.hotelManagmentSystem.dataproviders.repository;
 
 import com.example.hotelManagmentSystem.dataproviders.entity.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.util.List;
+
+@Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Integer> {
+
+    @Query("select res from Reservation res where " +
+            ":checkInDate < res.checkOut and :checkOutDate > res.checkIn " +
+            "and res.kids = :kids and res.adults = :adults")
+    List<Reservation> findReservations(
+            LocalDate checkInDate,
+            LocalDate checkOutDate,
+            int kids,
+            int adults
+    );
+
 }

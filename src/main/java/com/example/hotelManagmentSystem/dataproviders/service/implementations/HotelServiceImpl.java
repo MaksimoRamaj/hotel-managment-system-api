@@ -4,6 +4,7 @@ import com.example.hotelManagmentSystem.dataproviders.dto.request.AddHotelReques
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AvailabilityRequest;
 import com.example.hotelManagmentSystem.dataproviders.dto.response.HotelResponse;
 import com.example.hotelManagmentSystem.dataproviders.dto.response.HotelServiceResponse;
+import com.example.hotelManagmentSystem.dataproviders.dto.response.ImageResponse;
 import com.example.hotelManagmentSystem.dataproviders.entity.*;
 import com.example.hotelManagmentSystem.dataproviders.repository.*;
 import com.example.hotelManagmentSystem.dataproviders.service.interfaces.IHotelService;
@@ -11,13 +12,19 @@ import com.example.hotelManagmentSystem.dataproviders.entity.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
 @org.springframework.stereotype.Service
 @RequiredArgsConstructor
 public class HotelServiceImpl implements IHotelService {
+    private final HotelImageRepository hotelImageRepository;
     private final ServiceRepository serviceRepository;
     private final UserRepository userRepository;
     private final HotelServiceRepository hotelServiceRepository;
@@ -82,7 +89,7 @@ public class HotelServiceImpl implements IHotelService {
     @Override
     public Set<HotelResponse> findAvailableHotels(AvailabilityRequest request) {
 
-        List<Room> rooms = roomRepository.findAvailableRooms(request.getCheckIn(),
+        Set<Room> rooms = roomRepository.findAvailableRooms(request.getCheckIn(),
                 request.getCheckOut(),
                 request.getAdult(),
                 request.getKids());
@@ -103,15 +110,16 @@ public class HotelServiceImpl implements IHotelService {
        return hotels.entrySet().stream()
                .map(hotelIntegerEntry -> {
                    Hotel hotel = hotelIntegerEntry.getKey();
-                   return HotelResponse.builder()
-                       .hotelId(hotel.getId())
-                       .noOfRooms(hotelIntegerEntry.getValue())
-                       .hotelName(hotel.getName())
-                       .hotelServices(
-                               mapHotelServicesToHotelServiceResponses(
-                                       hotel.getHotelServices()))
-                           .admin(hotel.getAdmin().getUsername())
-                           .description(hotel.getDescription()).build();
+                       return HotelResponse.builder()
+                           .hotelId(hotel.getId())
+                           .noOfRooms(hotelIntegerEntry.getValue())
+                           .hotelName(hotel.getName())
+                           .hotelServices(
+                                   mapHotelServicesToHotelServiceResponses(
+                                           hotel.getHotelServices()))
+                               .admin(hotel.getAdmin().getUsername())
+                               .description(hotel.getDescription())
+                               .images(downloadImageFromFileSystem(hotel.getId())).build();
                }).collect(Collectors.toSet());
 
     }
@@ -132,6 +140,7 @@ public class HotelServiceImpl implements IHotelService {
                 .admin(hotel.getAdmin().getEmail())
                 .hotelName(hotel.getName())
                 .description(hotel.getDescription())
+                .noOfRooms(hotel.getRooms().size())
                 .hotelServices(mapHotelServicesToHotelServiceResponses(hotel.getHotelServices()))
                 .build();
     }
@@ -146,5 +155,26 @@ public class HotelServiceImpl implements IHotelService {
                                 .serviceName(hotelService.getService().getName())
                                 .build())
                 .collect(Collectors.toSet());
+    }
+
+    private Set<ImageResponse> downloadImageFromFileSystem(Integer hotelId){
+        Set<ImageResponse> imageResponses = new HashSet<>();
+        Set<HotelImage> hotelImages = hotelImageRepository.findByHotelId(hotelId);
+        for (HotelImage fileData: hotelImages) {
+            String filePath = fileData.getUrl();
+            try {
+                imageResponses.add(ImageResponse.builder()
+                        .image(Files.readAllBytes(new File(filePath).toPath()))
+                        .imageName(fileData.getName())
+                        .message(fileData.getUrl()).build());
+            }catch (IOException e){
+                imageResponses.add(ImageResponse.builder()
+                        .image(null)
+                        .imageName(fileData.getName())
+                        .message("Imazhi me path: " + fileData.getUrl() +
+                                "nuk mund te lexohej!").build());
+            }
+        }
+        return imageResponses;
     }
 }

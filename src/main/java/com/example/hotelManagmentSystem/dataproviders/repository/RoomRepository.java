@@ -10,20 +10,21 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Integer>
 {
     List<Room> findAllByHotelId(Integer hotelId);
 
-    @Query("SELECT r FROM Room r WHERE r.id NOT IN (" +
-            "SELECT res.room.id FROM Reservation res " +
-            "WHERE :checkInDate < res.checkOut AND :checkOutDate > res.checkIn) " +
-            "AND r.kids = :kids AND r.adult = :adults")
-    List<Room> findAvailableRooms(@Param("checkInDate") LocalDate checkInDate,
-                                  @Param("checkOutDate") LocalDate checkOutDate,
-                                  @Param("kids") int kids,
-                                  @Param("adults") int adults);
+    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
+            "SELECT res.\"room_id\" FROM \"reservation\" res " +
+            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\") " +
+            "AND (r.\"kids\" = ?3 AND r.\"adult\" = ?4))", nativeQuery = true)
+    Set<Room> findAvailableRooms(LocalDate checkInDate,
+                                 LocalDate checkOutDate,
+                                 int kids,
+                                 int adults);
 
 
 
