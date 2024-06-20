@@ -3,6 +3,7 @@ package com.example.hotelManagmentSystem.config;
 
 import com.example.hotelManagmentSystem.core.exceptions.InvalidTokenException;
 import com.example.hotelManagmentSystem.dataproviders.service.implementations.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,8 +47,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         //extract token else
 
         jwtToken = authHeader.substring(7);
-        //extract user from token
-        userEmail = jwtService.extractUsername(jwtToken);
+
+        try {
+            userEmail = jwtService.extractUsername(jwtToken);
+        }catch (ExpiredJwtException e){
+            throw new InvalidTokenException("Token expired or invalid");
+        }
         //check if is authenticated using securityholder
         if (userEmail != null &&
                 SecurityContextHolder.getContext()
@@ -65,9 +70,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 .buildDetails(request)
                 );
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-            }else{
-                throw new InvalidTokenException("Token expired or invalid");
-            }
+
             filterChain.doFilter(request,response);
         }
 
@@ -79,5 +82,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 //       return request.getServletPath().contains("/v3/api-docs/**") ||
 //               request.getServletPath().contains("/swagger-ui/**") || request.getServletPath().contains("/swagger-ui.html");
 //    }
-}
+}}
 
