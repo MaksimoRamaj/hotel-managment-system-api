@@ -42,7 +42,7 @@ public class SecurityConfiguration {
                         .requestMatchers("api/hotel-services/**")
                         .permitAll()
                         .anyRequest()
-                        .permitAll())
+                        .authenticated())
                 .sessionManagement(sesion->sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter,UsernamePasswordAuthenticationFilter.class);
