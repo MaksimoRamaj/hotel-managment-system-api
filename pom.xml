@@ -152,6 +152,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<finalName>hotel-manag-v2</finalName>
 	</build>
 
 </project>
