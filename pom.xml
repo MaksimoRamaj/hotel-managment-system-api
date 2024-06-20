@@ -146,7 +146,7 @@
 						/src/main/resources/db/changelog/changelog-master.xml
 					</changeLogFile>
 					<driver>org.postgresql.Driver</driver>
-					<url>jdbc:postgresql://localhost:5432/hotel_v2</url>
+					<url>jdbc:postgresql://${env.DB_URL}:5432/hotel_v2</url>
 					<username>postgres</username>
 					<password>massimo</password>
 				</configuration>

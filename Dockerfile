@@ -7,4 +7,4 @@ ENV DB_PORT=5432
 ENV DB_NAME=hotel_v2
 ENV DB_PASSWORD=massimo
 ENV DB_USER=postgres
-ENV DB_URL=localhost
+ENV DB_URL=0.0.0.0
