@@ -1,0 +1,37 @@
+version: '3.8'
+services:
+  db:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    container_name: postgres
+    environment:
+      POSTGRES_DB: hotel_V2
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: massimo
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+
+  app:
+    image: mramaj/hotel-manag-v2:latest
+    container_name: springapp
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/hotel_v2
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: massimo
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+
+volumes:
+  db-data:

@@ -8,3 +8,4 @@ ENV DB_NAME=hotel_v2
 ENV DB_PASSWORD=massimo
 ENV DB_USER=postgres
 ENV DB_URL=127.0.0.1
+
