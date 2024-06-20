@@ -36,11 +36,15 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build & push PostgreSQL Docker image
-        run: |
-          docker build -t mramaj/postgres-custom:latest ./postgres
-          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          docker push mramaj/postgres-custom:latest
+      - name: Build & push PostgreSQL app Docker image
+        uses: mr-smithers-excellent/docker-build-push@v6
+        with:
+          image: ramaj/postgres-custom:latest
+          tags: latest
+          registry: docker.io
+          dockerfile: /postgres/Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Set up Docker Compose
         run: docker-compose up --build -d
