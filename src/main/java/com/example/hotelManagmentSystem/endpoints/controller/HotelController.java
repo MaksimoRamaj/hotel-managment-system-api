@@ -19,11 +19,12 @@ public class HotelController {
 
     private final IHotelService hotelService;
     private final JwtService jwtService;
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/add")
     public ResponseEntity<?> addHotel(@RequestBody AddHotelRequest request,
                                       @NonNull HttpServletRequest httpServletRequest){
-        String authHeader = httpServletRequest.getHeader("Authorization");
+            String authHeader = httpServletRequest.getHeader("Authorization");
         String jwtToken = authHeader.substring(7);
         String userEmail = jwtService.extractUsername(jwtToken);
         return new ResponseEntity<>(hotelService.addHotel(request,userEmail), HttpStatus.ACCEPTED);

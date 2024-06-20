@@ -54,7 +54,7 @@ public class UserService implements IUserService {
         List<String> rolesNames = new ArrayList<>();
         rolesNames.add(user.getRole().getName());
         String token = jwtService.generateToken(user,rolesNames);
-        if (user.getRole().getName().equalsIgnoreCase("USER")){
+        if (user.getRole().getName().equalsIgnoreCase("ROLE_USER")){
             return new ResponseEntity<>(new ClientAuthResponse(
                     token,
                     user.getRole().getName(),
@@ -77,15 +77,15 @@ public class UserService implements IUserService {
             user.setEmail(registerRequest.getEmail());
             user.setPassword(passwordEncoder.encode(registerRequest.
                     getPassword()));
-            String myrole = "user";
+            String myrole = "ROLE_USER";
             log.info("register request role: " + registerRequest.getRole());
             if (registerRequest.getRole().isEmpty() || registerRequest.
                     getRole().equalsIgnoreCase("user")) {
-                myrole = "USER";
+                myrole = "ROLE_USER";
             }
 
             if (registerRequest.getRole().equalsIgnoreCase("admin")) {
-                myrole = "ADMIN";
+                myrole = "ROLE_ADMIN";
             }
             Role role = roleRepository.findByName(myrole).get();
             log.info("Role from repo: " + role.getName());
