@@ -33,6 +33,10 @@ public class ReservationServiceImpl implements IReservationService {
         User user = userRepository.findUserByEmail(userEmail).get();
         Room room = roomRepository.findById(request.getRoomId()).get();
 
+        if (request.getCheckIn().isAfter(request.getCheckOut())){
+            throw new BookingException("Check-in nuk mund te jete me vone check-out!");
+        }
+
         //kontrollo nese dhoma eshte ende available ne datat e kerkuara
         if (roomRepository.findAvailableRoom(request.getCheckIn(),
                 request.getCheckOut(),

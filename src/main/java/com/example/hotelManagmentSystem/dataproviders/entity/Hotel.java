@@ -1,6 +1,7 @@
 package com.example.hotelManagmentSystem.dataproviders.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.LinkedHashSet;
@@ -24,9 +25,11 @@ public class Hotel {
     private User admin;
 
     @Column(name = "name", length = Integer.MAX_VALUE)
+    @NotNull
     private String name;
 
     @Column(name = "address")
+    @NotNull
     private Integer address;
 
     @Column(name = "description", length = Integer.MAX_VALUE)
@@ -36,6 +39,7 @@ public class Hotel {
     private Set<HotelService> hotelServices = new LinkedHashSet<>();
 
     @Column(name = "tax_rate")
+    @NotNull
     private Double taxRate;
 
     @OneToMany(mappedBy = "hotel")

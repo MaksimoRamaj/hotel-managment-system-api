@@ -35,16 +35,16 @@ public class RoomServiceImpl implements IRoomService {
     @Override
     public RoomResponse addRoom(AddRoomRequest request,String userEmail) {
 
-        if (!isPriceDayDtoValid(request.getPriceDayDto())){
-             throw new InvalidRoomPriceException("Price should be > 0 or " +
-                     "fill prices for all weekdays, no repeated days allowed!");
-        };
-
         User user = userRepository.findUserByEmail(userEmail).get();
         Hotel hotel = hotelRepository.findById(request.getHotelId()).get();
 
+        if (!isPriceDayDtoValid(request.getPriceDayDto())){
+            throw new InvalidRoomPriceException("Price should be > 0 or " +
+                    "fill prices for all weekdays, no repeated days allowed!");
+        };
+
         if (hotel.getAdmin().getId().intValue() != user.getId().intValue()){
-            throw new InvalidRequestException("You should be the owner of the hotel to add room!");
+            throw new InvalidRequestException("You should be the owner of the hotel to add the room!");
         }
 
         Room room = Room.builder()
