@@ -21,4 +21,5 @@ public class RoomResponse {
     private String description;
     private double taxRate;
     private Set<PriceDayDto> priceDayDto;
+    private Set<ImageResponse> images;
 }

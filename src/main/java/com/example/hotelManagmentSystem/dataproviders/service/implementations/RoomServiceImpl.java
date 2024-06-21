@@ -2,9 +2,11 @@ package com.example.hotelManagmentSystem.dataproviders.service.implementations;
 
 import com.example.hotelManagmentSystem.core.exceptions.InvalidRequestException;
 import com.example.hotelManagmentSystem.core.exceptions.InvalidRoomPriceException;
+import com.example.hotelManagmentSystem.core.exceptions.UploadImageException;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AddRoomRequest;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AvailabilityRequest;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.PriceDayDto;
+import com.example.hotelManagmentSystem.dataproviders.dto.response.ImageResponse;
 import com.example.hotelManagmentSystem.dataproviders.dto.response.ReservationResponse;
 import com.example.hotelManagmentSystem.dataproviders.dto.response.RoomDetailResponse;
 import com.example.hotelManagmentSystem.dataproviders.dto.response.RoomResponse;
@@ -15,7 +17,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -26,13 +32,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class RoomServiceImpl implements IRoomService {
+    private final RoomImageRepository roomImageRepository;
     private final RoomPriceRepository roomPriceRepository;
 
     private final RoomRepository roomRepository;
     private final HotelRepository hotelRepository;
     private final UserRepository userRepository;
 
+    private final String FOLDER_PATH = "C:\\Users\\USER\\OneDrive\\Desktop\\hotelManagmentSystem\\src\\main\\resources\\images\\";
+
+
     @Override
+    @Transactional
     public RoomResponse addRoom(AddRoomRequest request,String userEmail) {
 
         User user = userRepository.findUserByEmail(userEmail).get();
@@ -66,6 +77,19 @@ public class RoomServiceImpl implements IRoomService {
 
         roomRepository.save(room);
         roomPriceRepository.saveAll(roomPrices);
+        if (!(request.getMultipartFiles() == null)){
+            request.getMultipartFiles().stream()
+                    .forEach(multipartFile ->
+                    {
+                        try {
+                            uploadImagesToFileSystem(
+                                    multipartFile,room
+                            );
+                        } catch (IOException e) {
+                            throw new UploadImageException("Fotoja nuk u ngarkua!");
+                        }
+                    });
+        }
 
         return mapToRoomResponse(room);
     }
@@ -110,6 +134,7 @@ public class RoomServiceImpl implements IRoomService {
                                 .dayOfWeek(roomPrice.getDay())
                                 .price(roomPrice.getPrice())
                                 .build()).collect(Collectors.toSet()))
+                .images(downloadImageFromFileSystem(room))
                 .build();
     }
 
@@ -138,6 +163,49 @@ public class RoomServiceImpl implements IRoomService {
         }
 
         return true;
+    }
+
+    public String uploadImagesToFileSystem(MultipartFile multipartFile, Room room) throws IOException {
+
+        String file_path = FOLDER_PATH + multipartFile.getOriginalFilename();
+
+        //ruaj ne db pathin e file dhe type
+        RoomImage hotelImage = roomImageRepository
+                .save(RoomImage.builder()
+                        .name(multipartFile.getOriginalFilename())
+                        .type(multipartFile.getContentType())
+                        .url(file_path)
+                        .room(room)
+                        .build());
+
+        //kalo filen ne filesystem
+        multipartFile.transferTo(new File(file_path));
+
+        if (hotelImage != null) {
+            return "File upload succesfully: " + file_path;
+        }
+        return null;
+    }
+
+    private Set<ImageResponse> downloadImageFromFileSystem(Room roomId) {
+        Set<ImageResponse> imageResponses = new HashSet<>();
+        Set<RoomImage> roomImages = roomImageRepository.findByRoomId(roomId.getId());
+        for (RoomImage fileData :roomImages) {
+            String filePath = fileData.getUrl();
+            try {
+                imageResponses.add(ImageResponse.builder()
+                        .image(Files.readAllBytes(new File(filePath).toPath()))
+                        .imageName(fileData.getName())
+                        .message(fileData.getUrl()).build());
+            } catch (IOException e) {
+                imageResponses.add(ImageResponse.builder()
+                        .image(null)
+                        .imageName(fileData.getName())
+                        .message("Imazhi me path: " + fileData.getUrl() +
+                                "nuk mund te lexohej!").build());
+            }
+        }
+        return imageResponses;
     }
 
 

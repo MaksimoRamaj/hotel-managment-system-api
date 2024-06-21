@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +21,10 @@ public class RoomController {
     private final IRoomService roomService;
     private final JwtService jwtService;
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping("/add")
-    public ResponseEntity<?> addRoom(@RequestBody AddRoomRequest request,@NonNull HttpServletRequest httpServletRequest){
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping(value = "/add" ,consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+            ,produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> addRoom(@ModelAttribute AddRoomRequest request,@NonNull HttpServletRequest httpServletRequest){
         String authHeader = httpServletRequest.getHeader("Authorization");
         String jwtToken = authHeader.substring(7);
         String userEmail = jwtService.extractUsername(jwtToken);
@@ -30,6 +32,7 @@ public class RoomController {
                 roomService.addRoom(request,userEmail)
                 ,HttpStatus.ACCEPTED);
     }
+
 
     @PostMapping("/available/{hotelId}")
     public ResponseEntity<?> getRoomByHotelId(@PathVariable Integer hotelId,

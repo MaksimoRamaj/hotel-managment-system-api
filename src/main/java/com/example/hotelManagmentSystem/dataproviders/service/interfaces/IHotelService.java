@@ -4,6 +4,7 @@ import com.example.hotelManagmentSystem.dataproviders.dto.request.AddHotelReques
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AvailabilityRequest;
 import com.example.hotelManagmentSystem.dataproviders.dto.response.HotelResponse;
 
+import java.io.IOException;
 import java.util.Set;
 
 public interface IHotelService {

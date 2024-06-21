@@ -1,5 +1,6 @@
 package com.example.hotelManagmentSystem.core.exceptions;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -34,6 +35,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(inputFormatException,HttpStatus.NOT_ACCEPTABLE);
     }
 
+    @ExceptionHandler(ExpiredJwtException.class)
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    public ResponseEntity<TokenException> handleExpiredJwtException(
+            ExpiredJwtException expiredJwtException
+    ){
+        TokenException tokenException = TokenException.builder()
+                .message(expiredJwtException.getMessage())
+                .build();
+
+        return new ResponseEntity<>(tokenException,HttpStatus.NOT_ACCEPTABLE);
+    }
+
     @ExceptionHandler(InvalidTokenException.class)
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public ResponseEntity<TokenException> handleInvalidTokenException(
@@ -41,8 +54,6 @@ public class GlobalExceptionHandler {
     ){
         TokenException tokenException = TokenException.builder()
                 .message(invalidTokenException.getMessage())
-                .httpStatus(HttpStatus.RESET_CONTENT)
-                .throwable(invalidTokenException)
                 .build();
 
         return new ResponseEntity<>(tokenException,HttpStatus.NOT_ACCEPTABLE);
@@ -72,5 +83,19 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(resourceException,HttpStatus.NOT_ACCEPTABLE);
     }
+
+    @ExceptionHandler(UploadImageException.class)
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    public ResponseEntity<ResourceException> handleUploadImageException(
+           UploadImageException uploadImageException
+    ){
+        ResourceException resourceException = ResourceException.builder()
+                .message(uploadImageException.getMessage())
+                .build();
+
+        return new ResponseEntity<>(resourceException,HttpStatus.NOT_ACCEPTABLE);
+    }
+
+
 
 }

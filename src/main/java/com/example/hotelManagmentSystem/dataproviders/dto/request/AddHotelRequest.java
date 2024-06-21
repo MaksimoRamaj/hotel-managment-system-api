@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
@@ -18,4 +19,5 @@ public class AddHotelRequest {
     private String hotelDesc;
     private Double taxRate;
     List<Integer> hotelServices;
+    private Set<MultipartFile> multipartFiles;
 }

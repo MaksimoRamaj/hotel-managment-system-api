@@ -39,7 +39,7 @@ jobs:
       - name: Build & push PostgreSQL app Docker image
         uses: mr-smithers-excellent/docker-build-push@v6
         with:
-          image: ramaj/postgres-custom
+          image: mramaj/postgres-custom
           tags: latest
           registry: docker.io
           dockerfile: postgres/Dockerfile

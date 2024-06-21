@@ -57,7 +57,7 @@ public class UserService implements IUserService {
         if (user.getRole().getName().equalsIgnoreCase("ROLE_USER")){
             return new ResponseEntity<>(new ClientAuthResponse(
                     token,
-                    user.getRole().getName(),
+                    user.getRole().getName().substring(5),
                     user.getClientLog().getTotalReservations(),
                     user.getClientLog().getScore(),
                     user.getFirstname(),
@@ -65,7 +65,7 @@ public class UserService implements IUserService {
                     user.getAddress()
             ),HttpStatus.OK);
         }
-        return new ResponseEntity<>(new AuthenticationResponse(token,user.getRole().getName()),HttpStatus.OK);
+        return new ResponseEntity<>(new AuthenticationResponse(token,user.getRole().getName().substring(5)),HttpStatus.OK);
     }
 
     @Override
@@ -107,7 +107,7 @@ public class UserService implements IUserService {
 
             userRepository.save(user);
 
-            if (user.getRole().getName().equalsIgnoreCase("USER")){
+            if (user.getRole().getName().equalsIgnoreCase("ROLE_USER")){
                 clientLogRepository.save(ClientLog.builder()
                         .client(user)
                         .score(0.0)
@@ -119,7 +119,7 @@ public class UserService implements IUserService {
             //useri ne response test case
             String token = jwtService.generateToken(user,
                     Collections.singletonList(role.getName()));
-            return new ResponseEntity<>(new AuthenticationResponse(token,user.getRole().getName()),HttpStatus.OK);
+            return new ResponseEntity<>(new AuthenticationResponse(token,user.getRole().getName().substring(5)),HttpStatus.OK);
         }
     }
 
