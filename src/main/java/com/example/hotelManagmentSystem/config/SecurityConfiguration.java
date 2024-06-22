@@ -1,5 +1,6 @@
 package com.example.hotelManagmentSystem.config;
 
+import com.example.hotelManagmentSystem.dataproviders.repository.TokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +28,8 @@ public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   TokenRepository tokenRepository) throws Exception {
 
         http.cors(httpSecurityCorsConfigurer ->
                         httpSecurityCorsConfigurer.configurationSource(request ->
@@ -45,7 +47,31 @@ public class SecurityConfiguration {
                         .authenticated())
                 .sessionManagement(sesion->sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter,UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter,UsernamePasswordAuthenticationFilter.class)
+                .logout(
+                        logout -> logout
+                                .logoutUrl("/api/auth/logout")
+                                .permitAll()
+                                .addLogoutHandler((request, response, authentication) -> {
+                                    final String authHeader = request.getHeader("Authorization");
+                                    if (authHeader == null || !authHeader.startsWith("Bearer ")){
+                                        return;
+                                    }
+                                    final String jwtToken = authHeader.substring(7);;
+                                    var storedToken =
+                                            tokenRepository.findByToken(jwtToken)
+                                                    .orElse(null);
+                                    if(storedToken != null){
+                                        storedToken.setExpired(true);
+                                        storedToken.setRevoked(true);
+                                        tokenRepository.save(storedToken);
+                                    }
+                                })
+                                .logoutSuccessHandler((request, response, authentication) -> {
+                                    SecurityContextHolder.clearContext();
+                                })
+                )
+        ;
 
         return http.build();
     }

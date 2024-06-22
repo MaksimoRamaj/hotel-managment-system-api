@@ -36,11 +36,6 @@ public class HotelServiceImpl implements IHotelService {
     private final String FOLDER_PATH = "C:\\Users\\USER\\OneDrive\\Desktop\\hotelManagmentSystem\\src\\main\\resources\\images\\";
 
 
-//    @Override
-//    public Set<HotelResponse> getAvailableHotelsFilterByRoomsAvailability(CheckAvailabilityRequest request) {
-//
-//    }
-
     @Override
     @Transactional
     public HotelResponse addHotel(AddHotelRequest addHotelRequest, String userEmail) {
@@ -53,11 +48,13 @@ public class HotelServiceImpl implements IHotelService {
                 .description(addHotelRequest.getHotelDesc())
                 .taxRate(addHotelRequest.getTaxRate())
                 .build();
+
         log.info("Hotel built!");
+
         List<Service> services = serviceRepository.findAllById(addHotelRequest.getHotelServices());
 
         Set<HotelService> hotelServices = services.stream().map(
-                service -> mapHotelServicesToHotelService(service, hotelToAdd)
+                service -> mapServicesToHotelService(service, hotelToAdd)
         ).collect(Collectors.toSet());
 
         hotelRepository.save(hotelToAdd);
@@ -65,6 +62,7 @@ public class HotelServiceImpl implements IHotelService {
         hotelServiceRepository.saveAll(hotelServices);
 
         log.info("Hotel Service!");
+
         if ((addHotelRequest.getMultipartFiles()!=null)&&(!addHotelRequest.getMultipartFiles().isEmpty())){
             addHotelRequest.getMultipartFiles().stream()
                     .forEach(multipartFile ->
@@ -83,7 +81,7 @@ public class HotelServiceImpl implements IHotelService {
     }
 
 
-    private HotelService mapHotelServicesToHotelService(Service service, Hotel hotelToAdd) {
+    private HotelService mapServicesToHotelService(Service service, Hotel hotelToAdd) {
         return HotelService.builder()
                 .hotel(hotelToAdd)
                 .service(service)
