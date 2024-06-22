@@ -153,6 +153,28 @@
             <column name="address_id" type="INT"/>
         </createTable>
     </changeSet>
+    
+    <changeSet id="39" author="maksi">
+        <createTable tableName="token">
+            <column name="id" type="integer">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_token"/>
+            </column>
+            <column name="token" type="text"/>
+            <column name="expired" type="bool"/>
+            <column name="revoked" type="bool"/>
+            <column name="user_id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="40" author="maksi">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="token"
+                                 constraintName="FK_TOKEN_ON_USER" referencedColumnNames="id"
+                                 referencedTableName="user"/>
+    </changeSet>
+
+    <changeSet id="42" author="maksi">
+        <createSequence incrementBy="50" sequenceName="token_seq" startValue="1"/>
+    </changeSet>
 
     <changeSet id="1" author="maksi">
         <createSequence incrementBy="50" sequenceName="address_seq" startValue="1"/>

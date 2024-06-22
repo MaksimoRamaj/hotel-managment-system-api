@@ -1,15 +1,14 @@
 package com.example.hotelManagmentSystem.dataproviders.service.implementations;
 
 
+import com.example.hotelManagmentSystem.core.exceptions.InputFormatException;
+import com.example.hotelManagmentSystem.core.exceptions.InvalidRequestException;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AuthenticationRequest;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.RegisterRequest;
 import com.example.hotelManagmentSystem.dataproviders.dto.response.AuthenticationResponse;
 import com.example.hotelManagmentSystem.dataproviders.dto.response.ClientAuthResponse;
 import com.example.hotelManagmentSystem.dataproviders.entity.*;
-import com.example.hotelManagmentSystem.dataproviders.repository.AddressRepository;
-import com.example.hotelManagmentSystem.dataproviders.repository.ClientLogRepository;
-import com.example.hotelManagmentSystem.dataproviders.repository.RoleRepository;
-import com.example.hotelManagmentSystem.dataproviders.repository.UserRepository;
+import com.example.hotelManagmentSystem.dataproviders.repository.*;
 import com.example.hotelManagmentSystem.dataproviders.service.interfaces.IUserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +32,7 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 public class UserService implements IUserService {
+    private final TokenRepository tokenRepository;
     private final AddressRepository addressRepository;
     private final ClientLogRepository clientLogRepository;
     private final AuthenticationManager authenticationManager;
@@ -54,6 +54,8 @@ public class UserService implements IUserService {
         List<String> rolesNames = new ArrayList<>();
         rolesNames.add(user.getRole().getName());
         String token = jwtService.generateToken(user,rolesNames);
+        revokeAllUserTokens(user);
+        saveUserToken(user,token);
         if (user.getRole().getName().equalsIgnoreCase("ROLE_USER")){
             return new ResponseEntity<>(new ClientAuthResponse(
                     token,
@@ -69,10 +71,17 @@ public class UserService implements IUserService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> register(RegisterRequest registerRequest) {
         if (userRepository.existsByEmail(registerRequest.getEmail())){
             return new ResponseEntity<>("Email is taken!", HttpStatus.CONFLICT);
         }else {
+
+            //kontrollo per null value
+            if (registerRequest.getAddress() == null){
+                throw new InvalidRequestException("User should register an address!");
+            }
+
             User user = new User();
             user.setEmail(registerRequest.getEmail());
             user.setPassword(passwordEncoder.encode(registerRequest.
@@ -119,8 +128,20 @@ public class UserService implements IUserService {
             //useri ne response test case
             String token = jwtService.generateToken(user,
                     Collections.singletonList(role.getName()));
+            saveUserToken(user, token);
             return new ResponseEntity<>(new AuthenticationResponse(token,user.getRole().getName().substring(5)),HttpStatus.OK);
         }
+    }
+
+    private void saveUserToken(User user, String token) {
+        Token tokenToPersist = Token.builder()
+                .user(user)
+                .token(token)
+                .revoked(false)
+                .expired(false)
+                .build();
+
+        tokenRepository.save(tokenToPersist);
     }
 
     @Override
@@ -131,5 +152,17 @@ public class UserService implements IUserService {
     @Override
     public User saveUser(User user) {
         return userRepository.save(user);
+    }
+
+    private void revokeAllUserTokens(User user){
+      List<Token> tokens = tokenRepository.findAllValidTokensByUser(user.getId());
+      if (tokens.isEmpty()){
+          return;
+      }
+      tokens.forEach(t->{
+          t.setExpired(true);
+          t.setRevoked(true);
+      });
+      tokenRepository.saveAll(tokens);
     }
 }

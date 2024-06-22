@@ -2,6 +2,8 @@ package com.example.hotelManagmentSystem.config;
 
 
 import com.example.hotelManagmentSystem.core.exceptions.InvalidTokenException;
+import com.example.hotelManagmentSystem.dataproviders.entity.Token;
+import com.example.hotelManagmentSystem.dataproviders.repository.TokenRepository;
 import com.example.hotelManagmentSystem.dataproviders.service.implementations.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -25,6 +27,7 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    private final TokenRepository tokenRepository;
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
@@ -58,8 +61,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext()
                         .getAuthentication() == null){
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-
-            if (jwtService.isTokenValid(jwtToken,userDetails)){
+           var isTokenValid = tokenRepository.findByToken(jwtToken)
+                   .map(token1 -> !token1.getExpired() && !token1.getRevoked())
+                   .orElse(false);
+           if (!isTokenValid){
+               throw new InvalidTokenException("Token revoked!");
+           }
+            if (jwtService.isTokenValid(jwtToken,userDetails)
+           ){
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,null
