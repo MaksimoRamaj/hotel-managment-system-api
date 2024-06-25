@@ -76,7 +76,6 @@ public class UserService implements IUserService {
         if (userRepository.existsByEmail(registerRequest.getEmail())){
             return new ResponseEntity<>("Email is taken!", HttpStatus.CONFLICT);
         }else {
-
             //kontrollo per null value
             if (registerRequest.getAddress() == null){
                 throw new InvalidRequestException("User should register an address!");

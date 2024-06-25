@@ -1,5 +1,6 @@
 package com.example.hotelManagmentSystem.dataproviders.service.implementations;
 
+import com.example.hotelManagmentSystem.core.exceptions.InvalidRequestException;
 import com.example.hotelManagmentSystem.core.exceptions.UploadImageException;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AddHotelRequest;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AvailabilityRequest;
@@ -19,6 +20,8 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.LocalDate;
+import java.time.chrono.ChronoLocalDate;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -108,13 +111,38 @@ public class HotelServiceImpl implements IHotelService {
     @Override
     public Set<HotelResponse> findAvailableHotels(AvailabilityRequest request) {
 
-        Set<Room> rooms = roomRepository.findAvailableRooms(request.getCheckIn(),
-                request.getCheckOut(),
-                request.getAdult(),
-                request.getKids());
+        if (request.getCheckIn().isBefore(LocalDate.now())){
+            throw new InvalidRequestException("Booking not valid!");
+        }
+        if (request.getCheckIn().isAfter(request.getCheckOut())){
+            throw new InvalidRequestException("Check-in should be before " +
+                    "checkout!");
+        }
 
+        Set<Room> rooms;
+        if (request.getKids() <=0 && request.getAdult() <= 0) {
+              rooms = roomRepository.findAvailableRooms(request.getCheckIn(),
+                request.getCheckOut());
+        } else if (request.getKids() <= 0) {
+              rooms = roomRepository.findAvailableRoomsWhenOnlyAdultPresent(
+                      request.getCheckIn(),
+                      request.getCheckOut(),
+                      request.getAdult());
+        } else if (request.getAdult() <= 0) {
+                rooms = roomRepository.findAvailableRooms(
+                        request.getCheckIn(),
+                        request.getCheckOut(),
+                        request.getKids());
+        }else {
+            rooms = roomRepository.findAvailableRooms(
+                    request.getCheckIn(),
+                    request.getCheckOut(),
+                    request.getKids(),
+                    request.getAdult()
+            );
+        }
         HashMap<Hotel, Integer> hotels = new HashMap<>();
-
+        //pasi ke marr gjithe dhomat bej numerim te grupuara sipas hotelit
         rooms.stream()
                 .forEach(room -> {
                             Hotel hotel = room.getHotel();

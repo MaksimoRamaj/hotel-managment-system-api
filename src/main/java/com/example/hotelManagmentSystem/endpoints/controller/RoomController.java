@@ -43,27 +43,6 @@ public class RoomController {
         );
     }
 
-//    @PostMapping("/available")
-//    public ResponseEntity<?> checkAvailability(
-//            @RequestBody AvailabilityRequest request
-//            ){
-//        return new ResponseEntity<>(
-//                roomService.findAvailableRooms(request),
-//                HttpStatus.ACCEPTED
-//        );
-//    }
-
-//    @PostMapping("/reserve")
-//    public ResponseEntity<?> reserveRoom(@RequestBody ReservationRequest request,
-//                                         @NonNull HttpServletRequest httpServletRequest){
-//        String authHeader = httpServletRequest.getHeader("Authorization");
-//        String jwtToken = authHeader.substring(7);
-//        String userEmail = jwtService.extractUsername(jwtToken);
-//
-//        return new ResponseEntity<>(
-//                roomService.reserveRoom(request,userEmail),HttpStatus.ACCEPTED
-//        );
-//    }
 
 
 }

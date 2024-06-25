@@ -58,9 +58,13 @@ public class RoomServiceImpl implements IRoomService {
             throw new InvalidRequestException("You should be the owner of the hotel to add the room!");
         }
 
+        if (request.getAdult() <= 0){
+            throw new InvalidRequestException("You should define the number of adults you expect in this room! > 0");
+        }
+
         Room room = Room.builder()
-                .adult(request.getAdult())
-                .kids(request.getKids())
+                .adult(request.getAdult() )
+                .kids(request.getKids() > 0 ? request.getKids() : 0)
                 .description(request.getDescription())
                 .hotel(hotel)
                 .type(request.getRoomType())

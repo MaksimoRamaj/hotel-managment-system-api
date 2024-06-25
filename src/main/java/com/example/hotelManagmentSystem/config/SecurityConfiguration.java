@@ -1,6 +1,7 @@
 package com.example.hotelManagmentSystem.config;
 
 import com.example.hotelManagmentSystem.dataproviders.repository.TokenRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -69,6 +70,9 @@ public class SecurityConfiguration {
                                 })
                                 .logoutSuccessHandler((request, response, authentication) -> {
                                     SecurityContextHolder.clearContext();
+                                    response.setStatus(HttpServletResponse.SC_OK);
+                                    response.setContentType("application/json");
+                                    response.getWriter().write("{\"message\": \"Logout successful\"}");
                                 })
                 )
         ;

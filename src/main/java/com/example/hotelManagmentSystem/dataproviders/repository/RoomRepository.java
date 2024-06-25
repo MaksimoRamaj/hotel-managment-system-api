@@ -2,6 +2,9 @@ package com.example.hotelManagmentSystem.dataproviders.repository;
 
 import com.example.hotelManagmentSystem.dataproviders.entity.Room;
 import org.springframework.cglib.core.Local;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,7 +29,64 @@ public interface RoomRepository extends JpaRepository<Room, Integer>
                                  int kids,
                                  int adults);
 
+    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
+            "SELECT res.\"room_id\" FROM \"reservation\" res " +
+            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\") " +
+            "AND (r.\"kids\" = ?3 AND r.\"adult\" = ?4))", nativeQuery = true)
+    Page<Room> findAvailableRooms(LocalDate checkInDate,
+                                  LocalDate checkOutDate,
+                                  int kids,
+                                  int adults,
+                                  Pageable pageable);
 
+    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
+            "SELECT res.\"room_id\" FROM \"reservation\" res " +
+            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\"))", nativeQuery = true)
+    Page<Room> findAvailableRooms(LocalDate checkInDate,
+                                 LocalDate checkOutDate,
+                                 Pageable pageable);
+
+    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
+            "SELECT res.\"room_id\" FROM \"reservation\" res " +
+            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\"))", nativeQuery = true)
+    Set<Room> findAvailableRooms(LocalDate checkInDate,
+                                 LocalDate checkOutDate);
+
+    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
+            "SELECT res.\"room_id\" FROM \"reservation\" res " +
+            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\") " +
+            "AND (r.\"kids\" = ?3))", nativeQuery = true)
+    Set<Room> findAvailableRooms(LocalDate checkInDate,
+                                 LocalDate checkOutDate,
+                                 int kids);
+
+    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
+            "SELECT res.\"room_id\" FROM \"reservation\" res " +
+            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\") " +
+            "AND (r.\"kids\" = ?3))", nativeQuery = true)
+    Page<Room> findAvailableRooms(LocalDate checkInDate,
+                                 LocalDate checkOutDate,
+                                 int kids,
+                                 Pageable pageable);
+
+    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
+            "SELECT res.\"room_id\" FROM \"reservation\" res " +
+            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\") " +
+            "AND (r.\"adult\" = ?4))", nativeQuery = true)
+    Page<Room> findAvailableRoomsWhenOnlyAdultPresent(
+                                 LocalDate checkInDate,
+                                 LocalDate checkOutDate,
+                                 int adults,
+                                 Pageable pageable);
+
+    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
+            "SELECT res.\"room_id\" FROM \"reservation\" res " +
+            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\") " +
+            "AND (r.\"adult\" = ?4))", nativeQuery = true)
+    Set<Room> findAvailableRoomsWhenOnlyAdultPresent(
+            LocalDate checkInDate,
+            LocalDate checkOutDate,
+            int adults);
 
 
     @Query("SELECT r FROM Room r WHERE r.id NOT IN (" +
