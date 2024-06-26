@@ -18,6 +18,6 @@ public class AddHotelRequest {
     private String hotelName;
     private String hotelDesc;
     private Double taxRate;
-    List<Integer> hotelServices;
+    Set<Integer> hotelServices;
     private Set<MultipartFile> multipartFiles;
 }

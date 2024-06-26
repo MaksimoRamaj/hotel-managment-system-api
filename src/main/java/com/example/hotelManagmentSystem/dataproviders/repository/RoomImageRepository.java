@@ -10,4 +10,5 @@ import java.util.Set;
 public interface RoomImageRepository extends JpaRepository<RoomImage, Integer> {
     Optional<RoomImage> findByName(String fileName);
     Set<RoomImage> findByRoomId(Integer roomId);
+    RoomImage findFirstByRoomId(Integer roomId);
 }

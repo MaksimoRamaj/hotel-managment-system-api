@@ -6,16 +6,17 @@ import com.example.hotelManagmentSystem.core.exceptions.UploadImageException;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AddRoomRequest;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AvailabilityRequest;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.PriceDayDto;
-import com.example.hotelManagmentSystem.dataproviders.dto.response.ImageResponse;
-import com.example.hotelManagmentSystem.dataproviders.dto.response.ReservationResponse;
-import com.example.hotelManagmentSystem.dataproviders.dto.response.RoomDetailResponse;
-import com.example.hotelManagmentSystem.dataproviders.dto.response.RoomResponse;
+import com.example.hotelManagmentSystem.dataproviders.dto.response.*;
 import com.example.hotelManagmentSystem.dataproviders.entity.*;
 import com.example.hotelManagmentSystem.dataproviders.repository.*;
 import com.example.hotelManagmentSystem.dataproviders.service.interfaces.IRoomService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -58,9 +59,13 @@ public class RoomServiceImpl implements IRoomService {
             throw new InvalidRequestException("You should be the owner of the hotel to add the room!");
         }
 
+        if (request.getAdult() <= 0){
+            throw new InvalidRequestException("You should define the number of adults you expect in this room! > 0");
+        }
+
         Room room = Room.builder()
-                .adult(request.getAdult())
-                .kids(request.getKids())
+                .adult(request.getAdult() )
+                .kids(request.getKids() > 0 ? request.getKids() : 0)
                 .description(request.getDescription())
                 .hotel(hotel)
                 .type(request.getRoomType())
@@ -95,29 +100,59 @@ public class RoomServiceImpl implements IRoomService {
     }
 
     @Override
-    public Set<RoomResponse> getRoomByHotelId(Integer hotelId,AvailabilityRequest request) {
-        Set<Room> rooms = roomRepository.findAvailableRooms(request.getCheckIn(),
-                request.getCheckOut(),
-                request.getAdult(),
-                request.getKids());
+    public LinkedList<RoomOfHotelResponse> getRoomByHotelId(Integer hotelId, AvailabilityRequest request,
+                                                     int pageNumber,int pageSize,String order) {
 
-        return rooms.stream()
-                .filter(room -> room.getHotel().getId().intValue() == hotelId)
-                .map(this::mapToRoomResponse)
-                .collect(Collectors.toSet());
+        if (request.getCheckIn().isBefore(LocalDate.now())){
+            throw new InvalidRequestException("Booking not valid!");
+        }
+        if (request.getCheckIn().isAfter(request.getCheckOut())){
+            throw new InvalidRequestException("Check-in should be before " +
+                    "checkout!");
+        }
+
+        Optional<Hotel> opHotel = hotelRepository.findById(hotelId);
+        if (opHotel.isEmpty()){
+            throw new InvalidRequestException("Hotel does not exists!");
+        }
+
+        LinkedList<Object[]> rooms;
+        if (order.equalsIgnoreCase("desc")){
+            rooms = roomRepository.findAvailableRoomsByHotelIdAndDateRangeOrderDesc(
+                    request.getCheckIn(),
+                    request.getCheckOut(),
+                    hotelId,
+                    pageNumber,
+                    pageSize
+            );
+        }else {
+            rooms = roomRepository.findAvailableRoomsByHotelIdAndDateRange(
+                    request.getCheckIn(),
+                    request.getCheckOut(),
+                    hotelId,
+                    pageNumber,
+                    pageSize
+            );
+        }
+
+
+        return rooms.stream().map(objects ->
+                RoomOfHotelResponse
+                        .builder()
+                        .roomId((Integer) objects[0])
+                        .hotelId((Integer) objects[1])
+                        .roomType((String) objects[2])
+                        .adult((Integer)objects[3])
+                        .kids((Integer)objects[4])
+                        .description((String) objects[5])
+                        .total((Double) objects[6])
+                        .noOfDays(ChronoUnit.DAYS.between(request.getCheckIn(),request.getCheckOut())+1)
+                        //.imageResponse(downloadFirstImageFromFileSystem((Integer) objects[0]))
+                        .build())
+                .collect(Collectors.toCollection(LinkedList::new));
+
     }
 
-    @Override
-    public Set<RoomResponse> findAvailableRooms(AvailabilityRequest request) {
-        Set<Room> rooms = roomRepository.findAvailableRooms(request.getCheckIn(),
-                request.getCheckOut(),
-                request.getAdult(),
-                request.getKids());
-
-
-
-        return null;
-    }
 
     private RoomResponse mapToRoomResponse(Room room){
 
@@ -137,6 +172,7 @@ public class RoomServiceImpl implements IRoomService {
                 .images(downloadImageFromFileSystem(room))
                 .build();
     }
+
 
     private boolean isPriceDayDtoValid(Set<PriceDayDto> priceDayDtos) {
         if (priceDayDtos == null) {
@@ -208,5 +244,64 @@ public class RoomServiceImpl implements IRoomService {
         return imageResponses;
     }
 
+    private Set<ImageResponse> downloadImageFromFileSystem(Integer roomId) {
+        Set<ImageResponse> imageResponses = new HashSet<>();
+        Set<RoomImage> roomImages = roomImageRepository.findByRoomId(roomId);
+        for (RoomImage fileData :roomImages) {
+            String filePath = fileData.getUrl();
+            try {
+                imageResponses.add(ImageResponse.builder()
+                        .image(Files.readAllBytes(new File(filePath).toPath()))
+                        .imageName(fileData.getName())
+                        .message(fileData.getUrl()).build());
+            } catch (IOException e) {
+                imageResponses.add(ImageResponse.builder()
+                        .image(null)
+                        .imageName(fileData.getName())
+                        .message("Imazhi me path: " + fileData.getUrl() +
+                                "nuk mund te lexohej!").build());
+            }
+        }
+        return imageResponses;
+    }
+
+    private ImageResponse downloadFirstImageFromFileSystem(Integer roomId) {
+        ImageResponse imageResponse;
+        RoomImage roomImages = roomImageRepository.findFirstByRoomId(roomId);
+        String filePath;
+
+        if (roomImages == null){
+                    filePath = "src/main/resources/images/dummyPicture.png";
+                try {
+                    imageResponse = ImageResponse.builder()
+                            .image(Files.readAllBytes(new File(filePath).toPath()))
+                            .imageName("dummyPicture!")
+                            .message("dummyPicture.jpg").build();
+                } catch (IOException e) {
+                    imageResponse = ImageResponse.builder()
+                            .image(null)
+                            .imageName("dummyPicture")
+                            .message("Imazhi " +
+                                    "nuk mund te lexohej!").build();
+                }
+        }else{
+                filePath = roomImages.getUrl();
+                try {
+                    imageResponse = ImageResponse.builder()
+                            .image(Files.readAllBytes(new File(filePath).toPath()))
+                            .imageName(roomImages.getName())
+                            .message(roomImages.getUrl()).build();
+                } catch (IOException e) {
+                    imageResponse = ImageResponse.builder()
+                            .image(null)
+                            .imageName(roomImages.getName())
+                            .message("Imazhi me path: " + roomImages.getUrl() +
+                                    "nuk mund te lexohej!").build();
+                }
+        }
+            return imageResponse;
+        }
 
 }
+
+

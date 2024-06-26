@@ -36,34 +36,16 @@ public class RoomController {
 
     @PostMapping("/available/{hotelId}")
     public ResponseEntity<?> getRoomByHotelId(@PathVariable Integer hotelId,
-                                              @RequestBody AvailabilityRequest request){
+                                              @RequestBody AvailabilityRequest request,
+                                              @RequestParam int pageNumber,
+                                              @RequestParam int pageSize,
+                                              @RequestParam(defaultValue = "asc") String order){
         return new ResponseEntity<>(
-                roomService.getRoomByHotelId(hotelId,request),
+                roomService.getRoomByHotelId(hotelId,request,pageNumber,pageSize,order),
                 HttpStatus.OK
         );
     }
 
-//    @PostMapping("/available")
-//    public ResponseEntity<?> checkAvailability(
-//            @RequestBody AvailabilityRequest request
-//            ){
-//        return new ResponseEntity<>(
-//                roomService.findAvailableRooms(request),
-//                HttpStatus.ACCEPTED
-//        );
-//    }
-
-//    @PostMapping("/reserve")
-//    public ResponseEntity<?> reserveRoom(@RequestBody ReservationRequest request,
-//                                         @NonNull HttpServletRequest httpServletRequest){
-//        String authHeader = httpServletRequest.getHeader("Authorization");
-//        String jwtToken = authHeader.substring(7);
-//        String userEmail = jwtService.extractUsername(jwtToken);
-//
-//        return new ResponseEntity<>(
-//                roomService.reserveRoom(request,userEmail),HttpStatus.ACCEPTED
-//        );
-//    }
 
 
 }

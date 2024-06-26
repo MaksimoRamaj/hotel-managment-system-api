@@ -1,6 +1,7 @@
 package com.example.hotelManagmentSystem.dataproviders.service.implementations;
 
 import com.example.hotelManagmentSystem.core.exceptions.BookingException;
+import com.example.hotelManagmentSystem.core.exceptions.InvalidRequestException;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.BookRequest;
 import com.example.hotelManagmentSystem.dataproviders.dto.response.ReservationResponse;
 import com.example.hotelManagmentSystem.dataproviders.entity.Reservation;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,10 +33,19 @@ public class ReservationServiceImpl implements IReservationService {
     public ReservationResponse book(BookRequest request, String userEmail) {
 
         User user = userRepository.findUserByEmail(userEmail).get();
-        Room room = roomRepository.findById(request.getRoomId()).get();
+        Optional<Room> opRoom = roomRepository.findById(request.getRoomId());
+
+        if (opRoom.isEmpty()){
+            throw new BookingException("Wrong room id!");
+        }
+
+        Room room = opRoom.get();
 
         if (request.getCheckIn().isAfter(request.getCheckOut())){
             throw new BookingException("Check-in nuk mund te jete me vone check-out!");
+        }
+        if (request.getCheckIn().isBefore(LocalDate.now())){
+            throw new InvalidRequestException("Check-in not valid!");
         }
 
         //kontrollo nese dhoma eshte ende available ne datat e kerkuara

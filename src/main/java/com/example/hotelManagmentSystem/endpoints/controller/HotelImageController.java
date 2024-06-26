@@ -19,7 +19,7 @@ public class HotelImageController {
 
     private final IHotelImageService hotelImageService;
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/fileSystem/hotel/{hotelId}")
     public ResponseEntity<?> uploadImageToFIleSystem(@PathVariable Integer hotelId,
                                                      @RequestParam("image") MultipartFile file) throws IOException {

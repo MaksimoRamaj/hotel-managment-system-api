@@ -25,7 +25,7 @@ public class StringToHotelServicesConverter implements Converter<String, Set<Int
             integerSet.addAll(Arrays.asList(integers));
             return integerSet;
         }catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Invalid format for PriceDayDto", e);
+            throw new IllegalArgumentException("Invalid format for HotelServices", e);
         }
     }
 }

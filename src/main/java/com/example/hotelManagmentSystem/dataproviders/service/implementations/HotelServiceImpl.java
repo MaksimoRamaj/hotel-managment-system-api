@@ -1,5 +1,6 @@
 package com.example.hotelManagmentSystem.dataproviders.service.implementations;
 
+import com.example.hotelManagmentSystem.core.exceptions.InvalidRequestException;
 import com.example.hotelManagmentSystem.core.exceptions.UploadImageException;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AddHotelRequest;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AvailabilityRequest;
@@ -13,12 +14,18 @@ import com.example.hotelManagmentSystem.dataproviders.entity.Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.LocalDate;
+import java.time.chrono.ChronoLocalDate;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -106,41 +113,50 @@ public class HotelServiceImpl implements IHotelService {
     }
 
     @Override
-    public Set<HotelResponse> findAvailableHotels(AvailabilityRequest request) {
+    public Set<HotelResponse> findAvailableHotels(AvailabilityRequest request,
+                                                  int pageNumber,
+                                                  int pageSize) {
 
-        Set<Room> rooms = roomRepository.findAvailableRooms(request.getCheckIn(),
+        if (request.getCheckIn().isBefore(LocalDate.now())){
+            throw new InvalidRequestException("Booking not valid!");
+        }
+        if (request.getCheckIn().isAfter(request.getCheckOut())){
+            throw new InvalidRequestException("Check-in should be before " +
+                    "checkout!");
+        }
+        Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+        Page<Object[]> hotelAndCount;
+        if (request.getKids() <=0 && request.getAdult() <= 0) {
+              hotelAndCount = hotelRepository.findAvailableHotels(request.getCheckIn(),
                 request.getCheckOut(),
-                request.getAdult(),
-                request.getKids());
+                      pageRequest);
+        } else if (request.getKids() <= 0) {
+              hotelAndCount = hotelRepository.findAvailableHotels(
+                      request.getCheckIn(),
+                      request.getCheckOut(),
+                      request.getAdult(),
+                      pageRequest);
+        } else if (request.getAdult() <= 0) {
+                hotelAndCount = hotelRepository.findAvailableHotelsWhenKidsPresent(
+                        request.getCheckIn(),
+                        request.getCheckOut(),
+                        request.getKids(),
+                        pageRequest);
+        }else {
+            hotelAndCount = hotelRepository.findAvailableHotels(
+                    request.getCheckIn(),
+                    request.getCheckOut(),
+                    request.getKids(),
+                    request.getAdult(),
+                    pageRequest
+            );
+        }
 
-        HashMap<Hotel, Integer> hotels = new HashMap<>();
 
-        rooms.stream()
-                .forEach(room -> {
-                            Hotel hotel = room.getHotel();
-                            if (!hotels.containsKey(hotel)) {
-                                hotels.put(hotel, 1);
-                            } else {
-                                hotels.put(hotel, hotels.get(hotel).intValue() + 1);
-                            }
-                        }
-                );
-
-        return hotels.entrySet().stream()
-                .map(hotelIntegerEntry -> {
-                    Hotel hotel = hotelIntegerEntry.getKey();
-                    return HotelResponse.builder()
-                            .hotelId(hotel.getId())
-                            .noOfRooms(hotelIntegerEntry.getValue())
-                            .hotelName(hotel.getName())
-                            .hotelServices(
-                                    mapHotelServicesToHotelServiceResponses(
-                                            hotel.getHotelServices()))
-                            .admin(hotel.getAdmin().getUsername())
-                            .description(hotel.getDescription())
-                            .images(downloadImageFromFileSystem(hotel.getId())).build();
-                }).collect(Collectors.toSet());
-
+       return hotelAndCount.get()
+                .map(
+                        object ->  mapHotelToHotelResponse((Hotel)object[0],((Long)object[1]).intValue(),hotelAndCount)
+                ).collect(Collectors.toSet());
     }
 
     private HotelResponse mapHotelToHotelResponse(Hotel hotel, Set<HotelService> hotelService) {
@@ -150,6 +166,19 @@ public class HotelServiceImpl implements IHotelService {
                 .hotelName(hotel.getName())
                 .description(hotel.getDescription())
                 .hotelServices(mapHotelServicesToHotelServiceResponses(hotelService))
+                .build();
+    }
+
+    private HotelResponse mapHotelToHotelResponse(Hotel hotel,int noOfRooms,Page page) {
+        return HotelResponse.builder()
+                .hotelId(hotel.getId())
+                .admin(hotel.getAdmin().getEmail())
+                .hotelName(hotel.getName())
+                .description(hotel.getDescription())
+                .noOfRooms(noOfRooms)
+                .hotelServices(mapHotelServicesToHotelServiceResponses(hotel.getHotelServices()))
+                .currentPage(page.getNumber())
+                .totalPageNumber(page.getTotalPages())
                 .build();
     }
 
