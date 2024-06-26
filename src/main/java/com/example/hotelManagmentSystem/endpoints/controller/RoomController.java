@@ -36,9 +36,12 @@ public class RoomController {
 
     @PostMapping("/available/{hotelId}")
     public ResponseEntity<?> getRoomByHotelId(@PathVariable Integer hotelId,
-                                              @RequestBody AvailabilityRequest request){
+                                              @RequestBody AvailabilityRequest request,
+                                              @RequestParam int pageNumber,
+                                              @RequestParam int pageSize,
+                                              @RequestParam(defaultValue = "asc") String order){
         return new ResponseEntity<>(
-                roomService.getRoomByHotelId(hotelId,request),
+                roomService.getRoomByHotelId(hotelId,request,pageNumber,pageSize,order),
                 HttpStatus.OK
         );
     }

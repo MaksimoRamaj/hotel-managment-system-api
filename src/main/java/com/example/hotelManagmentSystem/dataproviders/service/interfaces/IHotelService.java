@@ -15,5 +15,5 @@ public interface IHotelService {
 
     Set<HotelResponse> findAllHotelsByUser(String userEmail);
 
-    Set<HotelResponse> findAvailableHotels(AvailabilityRequest request);
+    Set<HotelResponse> findAvailableHotels(AvailabilityRequest request,int pageNumber,int pageSize);
 }

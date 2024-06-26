@@ -2,6 +2,7 @@ package com.example.hotelManagmentSystem.endpoints.controller;
 
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AddHotelRequest;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AvailabilityRequest;
+import com.example.hotelManagmentSystem.dataproviders.repository.HotelRepository;
 import com.example.hotelManagmentSystem.dataproviders.service.implementations.JwtService;
 import com.example.hotelManagmentSystem.dataproviders.service.interfaces.IHotelService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -53,10 +54,12 @@ public class HotelController {
 
     @PostMapping("/available")
     public ResponseEntity<?> checkAvailability(
-            @RequestBody AvailabilityRequest request
+            @RequestBody AvailabilityRequest request,
+            @RequestParam int pageNumber,
+            @RequestParam int pageSize
     ){
         return new ResponseEntity<>(
-                hotelService.findAvailableHotels(request),
+                hotelService.findAvailableHotels(request,pageNumber,pageSize),
                 HttpStatus.ACCEPTED
         );
     }

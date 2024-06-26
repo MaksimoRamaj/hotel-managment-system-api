@@ -20,7 +20,7 @@ public class Hotel {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id")
     private User admin;
 
@@ -39,7 +39,7 @@ public class Hotel {
     @Column(name = "tax_rate")
     private Double taxRate;
 
-    @OneToMany(mappedBy = "hotel")
+    @OneToMany(mappedBy = "hotel" , fetch = FetchType.LAZY)
     private Set<Room> rooms = new LinkedHashSet<>();
 
 }
