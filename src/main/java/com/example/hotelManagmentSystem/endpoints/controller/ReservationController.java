@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/reservation")
@@ -32,6 +29,22 @@ public class ReservationController {
 
         return new ResponseEntity<>(
                 reservationService.book(request,userEmail), HttpStatus.ACCEPTED
+        );
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/history")
+    public ResponseEntity<?> getAllUserReservations(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @NonNull HttpServletRequest httpServletRequest){
+        String authHeader = httpServletRequest.getHeader("Authorization");
+        String jwtToken = authHeader.substring(7);
+        String userEmail = jwtService.extractUsername(jwtToken);
+
+        return new ResponseEntity<>(
+                reservationService.getReservationsByUser(userEmail,pageNumber,pageSize),
+                HttpStatus.OK
         );
     }
 }

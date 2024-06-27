@@ -28,4 +28,5 @@ public class ReservationResponse {
     private Double discount;
     private Double total;
     private LocalDate createdAt;
+    private ReservationStatus status;
 }

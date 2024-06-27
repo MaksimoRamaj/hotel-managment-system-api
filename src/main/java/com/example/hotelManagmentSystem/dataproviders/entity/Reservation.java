@@ -56,4 +56,7 @@ public class Reservation {
     @Column(name = "total")
     private Double total;
 
+    @Column(name = "status")
+    private ReservationStatus status;
+
 }
