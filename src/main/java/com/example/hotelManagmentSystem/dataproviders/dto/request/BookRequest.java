@@ -1,5 +1,6 @@
 package com.example.hotelManagmentSystem.dataproviders.dto.request;
 
+import com.example.hotelManagmentSystem.dataproviders.entity.Address;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -24,8 +25,12 @@ public class BookRequest {
     private double netValue;
     private double discount;
     private double totalAfterTax;
+    private String fullName;
+    private String email;
+    private Address address;
+    private String phoneNumber;
     private String nameOnCard;
     private String numberOnCard;
     private String expireCard;
-    private int cvv;
+    private String cvv;
 }

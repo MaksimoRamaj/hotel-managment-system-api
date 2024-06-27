@@ -3,8 +3,10 @@ package com.example.hotelManagmentSystem.dataproviders.service.implementations;
 import com.example.hotelManagmentSystem.core.exceptions.BookingException;
 import com.example.hotelManagmentSystem.core.exceptions.InvalidRequestException;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.BookRequest;
+import com.example.hotelManagmentSystem.dataproviders.dto.response.ReservationHistoryResponse;
 import com.example.hotelManagmentSystem.dataproviders.dto.response.ReservationResponse;
 import com.example.hotelManagmentSystem.dataproviders.entity.Reservation;
+import com.example.hotelManagmentSystem.dataproviders.entity.ReservationStatus;
 import com.example.hotelManagmentSystem.dataproviders.entity.Room;
 import com.example.hotelManagmentSystem.dataproviders.entity.User;
 import com.example.hotelManagmentSystem.dataproviders.repository.ClientLogRepository;
@@ -12,16 +14,27 @@ import com.example.hotelManagmentSystem.dataproviders.repository.ReservationRepo
 import com.example.hotelManagmentSystem.dataproviders.repository.RoomRepository;
 import com.example.hotelManagmentSystem.dataproviders.repository.UserRepository;
 import com.example.hotelManagmentSystem.dataproviders.service.interfaces.IReservationService;
+import com.example.hotelManagmentSystem.validators.EmailValidator;
+import com.example.hotelManagmentSystem.validators.PhoneNumberValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReservationServiceImpl implements IReservationService {
 
     private final UserRepository userRepository;
@@ -47,6 +60,9 @@ public class ReservationServiceImpl implements IReservationService {
         if (request.getCheckIn().isBefore(LocalDate.now())){
             throw new InvalidRequestException("Check-in not valid!");
         }
+
+        clientCredentialsValidator(request);
+        creditCardValidator(request);
 
         //kontrollo nese dhoma eshte ende available ne datat e kerkuara
         if (roomRepository.findAvailableRoom(request.getCheckIn(),
@@ -89,6 +105,7 @@ public class ReservationServiceImpl implements IReservationService {
                 .kids(room.getKids())
                 .netValue(netValue)
                 .taxRate(room.getHotel().getTaxRate())
+                .status(ReservationStatus.CONFIRMED)
                 .build();
 
         //llogarit discount nese eshte aplikuar
@@ -146,8 +163,92 @@ public class ReservationServiceImpl implements IReservationService {
                 .taxRate(reservation.getTaxRate())
                 .discount(reservation.getDiscount())
                 .createdAt(reservation.getCreatedAt())
+                .status(reservation.getStatus())
                 .total(reservation.getTotal())
                 .build();
 
+    }
+
+    private void creditCardValidator(BookRequest bookRequest){
+        if (bookRequest.getNameOnCard() == null || bookRequest.getNameOnCard().isEmpty()){
+            throw new InvalidRequestException("You should provide a name for the card!");
+        }
+        if (bookRequest.getExpireCard() == null ||
+             bookRequest.getExpireCard().isEmpty()){
+            throw new InvalidRequestException("You should provide an expiration date!");
+        }
+
+        String expireDateRegex = "^(0[1-9]|1[0-2])/([0-9]{2})$";
+        //kontrollo formatin
+        if(!Pattern.compile(expireDateRegex)
+                .matcher(bookRequest.getExpireCard()).matches()){
+            throw new InvalidRequestException("ExpireDate format not valid!");
+        }
+
+        YearMonth cardYearMonth =
+                YearMonth.of(Integer.parseInt(bookRequest.getExpireCard().substring(3,5)+2000),
+                        Integer.parseInt(bookRequest.getExpireCard().substring(0,2)));
+
+        if (cardYearMonth.isBefore(YearMonth.now())){
+            throw new BookingException("Credit Card is expired!");
+        }
+
+        String cvv = bookRequest.getCvv().replaceAll("[^\\d]", "");
+
+        if (cvv.length() != 3 || (Integer.parseInt(cvv) < 0)){
+            throw new BookingException("Invalid cvv!");
+        }
+        if (bookRequest.getNumberOnCard() == null ||
+            bookRequest.getNumberOnCard().length() != 16 ||
+            containsNonNumericCharacters(bookRequest.getNumberOnCard())
+        ){
+            throw new BookingException("Invalid card number!");
+        }
+    }
+
+    private  boolean containsNonNumericCharacters(String str) {
+        Pattern pattern = Pattern.compile("[^\\d]");
+        Matcher matcher = pattern.matcher(str);
+        return matcher.find();
+    }
+
+    private void clientCredentialsValidator(BookRequest bookRequest){
+        if (bookRequest.getFullName() == null || bookRequest.getFullName().isEmpty()){
+            throw new InvalidRequestException("Full Name is missing or is empty!");
+        }
+        boolean isValid = EmailValidator.validate(bookRequest.getEmail());
+        if (!isValid){
+            throw new InvalidRequestException("Email format not valid!");
+        }
+        if (bookRequest.getAddress() == null){
+            throw new InvalidRequestException("You should provide an address!");
+        }
+        if (bookRequest.getPhoneNumber() == null || bookRequest.getPhoneNumber().isEmpty()
+                || (!PhoneNumberValidator.validate(bookRequest.getPhoneNumber()))){
+            throw new InvalidRequestException("You should provide a valid phone number!");
+        }
+
+    }
+
+    @Override
+    public Set<ReservationHistoryResponse> getReservationsByUser(String userEmail,int pageNumber,int pageSize) {
+        User user = userRepository.findUserByEmail(userEmail).get();
+
+        PageRequest requestPage = PageRequest.of(pageNumber,pageSize);
+
+        Page<Reservation> reservations = reservationRepository
+                .findAllByClientId(user.getId(),requestPage);
+
+           return reservations.get()
+                    .map(reservation ->
+                            ReservationHistoryResponse.builder()
+                                    .hotelName(reservation.getHotel().getName())
+                                    .total(reservation.getTotal())
+                                    .checkIn(reservation.getCheckIn())
+                                    .status(reservation.getStatus())
+                                    .currentPage(pageNumber)
+                                    .pageSize(pageSize)
+                                    .totalPages(reservations.getTotalPages())
+                                    .build()).collect(Collectors.toSet());
     }
 }

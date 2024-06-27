@@ -83,6 +83,12 @@
             <column name="total" type="DOUBLE"/>
         </createTable>
     </changeSet>
+    
+    <changeSet id="43" author="maksi">
+        <addColumn tableName="reservation">
+            <column name="status" type="smallint"/>
+        </addColumn>
+    </changeSet>
 
     <changeSet id="19" author="maksi">
         <createTable tableName="role">
