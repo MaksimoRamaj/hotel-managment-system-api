@@ -17,6 +17,7 @@ public class ServicesController {
 
     private final IServicesService hotelServicesService;
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @GetMapping
     public ResponseEntity<?> getAll(){
         return new ResponseEntity<>(

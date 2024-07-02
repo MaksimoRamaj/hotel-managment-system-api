@@ -10,6 +10,7 @@ import com.example.hotelManagmentSystem.dataproviders.dto.response.ClientAuthRes
 import com.example.hotelManagmentSystem.dataproviders.entity.*;
 import com.example.hotelManagmentSystem.dataproviders.repository.*;
 import com.example.hotelManagmentSystem.dataproviders.service.interfaces.IUserService;
+import com.example.hotelManagmentSystem.validators.EmailValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -73,6 +74,9 @@ public class UserService implements IUserService {
     @Override
     @Transactional
     public ResponseEntity<?> register(RegisterRequest registerRequest) {
+        if (!EmailValidator.validate(registerRequest.getEmail())){
+            return new ResponseEntity<>("Email format not valid!", HttpStatus.NOT_ACCEPTABLE);
+        }
         if (userRepository.existsByEmail(registerRequest.getEmail())){
             return new ResponseEntity<>("Email is taken!", HttpStatus.CONFLICT);
         }else {

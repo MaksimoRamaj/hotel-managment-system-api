@@ -45,17 +45,12 @@ public class ReservationServiceImpl implements IReservationService {
     @Override
     public ReservationResponse book(BookRequest request, String userEmail) {
 
-        User user = userRepository.findUserByEmail(userEmail).get();
-        Optional<Room> opRoom = roomRepository.findById(request.getRoomId());
-
-        if (opRoom.isEmpty()){
-            throw new BookingException("Wrong room id!");
-        }
-
-        Room room = opRoom.get();
+        User user = userRepository.findUserByEmail(userEmail).orElseThrow();
+        Room room = roomRepository.findById(request.getRoomId())
+                .orElseThrow(()->new BookingException("Wrong room id!"));
 
         if (request.getCheckIn().isAfter(request.getCheckOut())){
-            throw new BookingException("Check-in nuk mund te jete me vone check-out!");
+            throw new BookingException("Check-in must be \"before\" Check-out!");
         }
         if (request.getCheckIn().isBefore(LocalDate.now())){
             throw new InvalidRequestException("Check-in not valid!");
@@ -76,17 +71,19 @@ public class ReservationServiceImpl implements IReservationService {
         //llogarit net value per ditet e qendrimit dhe krahasoje me vleren e ardhur
         //prej front end
 
-        HashMap<DayOfWeek,Double> dayOfWeekDoubleHashMap = new HashMap<>();
+        HashMap<DayOfWeek,Double> dayOfWeekPriceHashMap = new HashMap<>();
                 room.getRoomPrices()
                         .stream()
                         .forEach(roomPrice ->
-                                dayOfWeekDoubleHashMap
+                                dayOfWeekPriceHashMap
                                         .put(roomPrice.getDay(),roomPrice.getPrice()));
 
         Double netValue = 0.0;
+
         LocalDate currentDate = request.getCheckIn();
+
         while (!currentDate.isAfter(request.getCheckOut().minusDays(1))) {
-            Double roomPrice = dayOfWeekDoubleHashMap.get(currentDate.getDayOfWeek());
+            Double roomPrice = dayOfWeekPriceHashMap.get(currentDate.getDayOfWeek());
             netValue+=roomPrice;
             currentDate = currentDate.plusDays(1);
         }
@@ -116,26 +113,7 @@ public class ReservationServiceImpl implements IReservationService {
         //prej front-end
         //1 score == 1$
 
-        if (request.getDiscount() != 0) {
-            //nese eshte aplikuar discount
-            //kontrollo nese useri i ka piket per te perfituar 10% discount
-            if (user.getClientLog().getScore() < (netValue) * 0.1){
-                throw new BookingException("Useri nuk ka mjaftushem pike" +
-                        "per te perfituar discount!");
-            }
-            //nese e perfiton discount kontrollo nese vlera eshte e sakte
-            if (request.getDiscount() > (netValue*0.1)){
-                throw new BookingException("Useri nuk mund te perfitoj me shume se 10% discount");
-            }
-            //nese e ka perfituar sakte
-            user.getClientLog().setScore(user.getClientLog().getScore()-request.getDiscount());
-
-            netValue -= request.getDiscount();
-            reservation.setDiscount(request.getDiscount());
-        }else {
-            //ne rast te kundert perfito score 3% te vleres neto
-            user.getClientLog().setScore(user.getClientLog().getScore()+(netValue*0.03));
-        }
+        netValue = applyDiscount(request, user, netValue, reservation);
 
         //aplko taksen
         double afterTax =netValue+netValue * (room.getHotel().getTaxRate()/100);
@@ -146,9 +124,39 @@ public class ReservationServiceImpl implements IReservationService {
 
         reservation.setTotal(afterTax);
         reservation.setCreatedAt(LocalDate.now());
+
         user.getClientLog().setTotalReservations(user.getClientLog().getTotalReservations().intValue()+1);
         clientLogRepository.save(user.getClientLog());
         reservation = reservationRepository.save(reservation);
+
+        return mapReservationToReservationResponse(reservation);
+    }
+
+    private Double applyDiscount(BookRequest request, User user, Double netValue, Reservation reservation) {
+        if (request.getDiscount() != 0) {
+            //nese eshte aplikuar discount
+            //kontrollo nese useri i ka piket per te perfituar 10% discount
+            if (user.getClientLog().getScore() < netValue * 0.1){
+                throw new BookingException("Useri nuk ka mjaftushem pike " +
+                        "per te perfituar discount!");
+            }
+            //nese e perfiton discount kontrollo nese vlera eshte e sakte
+            if (request.getDiscount() > (netValue *0.1)){
+                throw new BookingException("Useri nuk mund te perfitoj me shume se 10% discount");
+            }
+            //nese e ka perfituar sakte
+            user.getClientLog().setScore(user.getClientLog().getScore()- request.getDiscount());
+
+            netValue -= request.getDiscount();
+            reservation.setDiscount(request.getDiscount());
+        }else {
+            //ne rast te kundert perfito score 3% te vleres neto
+            user.getClientLog().setScore(user.getClientLog().getScore()+(netValue *0.03));
+        }
+        return netValue;
+    }
+
+    private ReservationResponse mapReservationToReservationResponse(Reservation reservation) {
         return ReservationResponse.builder()
                 .reservationId(reservation.getId())
                 .hotelName(reservation.getHotel().getName())
@@ -166,7 +174,6 @@ public class ReservationServiceImpl implements IReservationService {
                 .status(reservation.getStatus())
                 .total(reservation.getTotal())
                 .build();
-
     }
 
     private void creditCardValidator(BookRequest bookRequest){

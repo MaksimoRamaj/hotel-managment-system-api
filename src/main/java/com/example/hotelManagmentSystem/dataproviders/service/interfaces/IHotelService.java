@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.Set;
 
 public interface IHotelService {
-//    public Set<HotelResponse> getAvailableHotelsFilterByRoomsAvailability(CheckAvailabilityRequest request);
     public HotelResponse addHotel(AddHotelRequest addHotelRequest,String userEmail);
 
     Set<HotelResponse> findAll();

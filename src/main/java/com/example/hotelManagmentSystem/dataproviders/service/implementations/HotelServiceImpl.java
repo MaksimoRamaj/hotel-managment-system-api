@@ -46,6 +46,7 @@ public class HotelServiceImpl implements IHotelService {
     @Override
     @Transactional
     public HotelResponse addHotel(AddHotelRequest addHotelRequest, String userEmail) {
+
         User user = userRepository.findUserByEmail(userEmail).get();
 
         Hotel hotelToAdd = Hotel
@@ -56,8 +57,6 @@ public class HotelServiceImpl implements IHotelService {
                 .taxRate(addHotelRequest.getTaxRate())
                 .build();
 
-        log.info("Hotel built!");
-
         List<Service> services = serviceRepository.findAllById(addHotelRequest.getHotelServices());
 
         Set<HotelService> hotelServices = services.stream().map(
@@ -67,8 +66,6 @@ public class HotelServiceImpl implements IHotelService {
         hotelRepository.save(hotelToAdd);
 
         hotelServiceRepository.saveAll(hotelServices);
-
-        log.info("Hotel Service!");
 
         if ((addHotelRequest.getMultipartFiles()!=null)&&(!addHotelRequest.getMultipartFiles().isEmpty())){
             addHotelRequest.getMultipartFiles().stream()
@@ -124,7 +121,9 @@ public class HotelServiceImpl implements IHotelService {
             throw new InvalidRequestException("Check-in should be before " +
                     "checkout!");
         }
+
         Pageable pageRequest = PageRequest.of(pageNumber,pageSize);
+
         Page<Object[]> hotelAndCount;
         if (request.getKids() <=0 && request.getAdult() <= 0) {
               hotelAndCount = hotelRepository.findAvailableHotels(request.getCheckIn(),
@@ -151,7 +150,6 @@ public class HotelServiceImpl implements IHotelService {
                     pageRequest
             );
         }
-
 
        return hotelAndCount.get()
                 .map(

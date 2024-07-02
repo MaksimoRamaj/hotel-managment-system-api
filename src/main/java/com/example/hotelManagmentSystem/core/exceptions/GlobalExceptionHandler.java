@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -19,10 +20,22 @@ public class GlobalExceptionHandler {
         ResourceException resourceException = ResourceException.builder()
                 .message(resourceNotFoundException.getMessage())
                 .httpStatus(HttpStatus.NOT_FOUND)
-                .throwable(resourceNotFoundException)
                 .build();
 
         return new ResponseEntity<>(resourceException,HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    public ResponseEntity<FileExceptionResponse> handleMaxUploadSizeExceededException(
+            MaxUploadSizeExceededException maxUploadSizeExceededException
+    ){
+        FileExceptionResponse resourceException = FileExceptionResponse.builder()
+                .message(maxUploadSizeExceededException.getMessage())
+                .httpStatus(HttpStatus.NOT_ACCEPTABLE)
+                .build();
+
+        return new ResponseEntity<>(resourceException,HttpStatus.NOT_ACCEPTABLE);
     }
 
     @ExceptionHandler(InvalidRoomPriceException.class)

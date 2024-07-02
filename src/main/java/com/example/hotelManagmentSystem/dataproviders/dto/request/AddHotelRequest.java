@@ -1,6 +1,7 @@
 package com.example.hotelManagmentSystem.dataproviders.dto.request;
 
 import com.example.hotelManagmentSystem.dataproviders.entity.HotelService;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,8 +16,11 @@ import java.util.Set;
 @Getter
 @Setter
 public class AddHotelRequest {
+    @NotBlank(message = "hotelName field must not be blank!")
     private String hotelName;
+    @NotBlank(message = "hotelDesc field must not be blank!")
     private String hotelDesc;
+    @NotBlank(message = "taxRate field must not be blank!")
     private Double taxRate;
     Set<Integer> hotelServices;
     private Set<MultipartFile> multipartFiles;

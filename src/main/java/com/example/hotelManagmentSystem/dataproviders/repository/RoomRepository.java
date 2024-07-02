@@ -36,8 +36,8 @@ public interface RoomRepository extends JpaRepository<Room, Integer>
             "            AND :checkOutDate > res.\"check_in\" " +
             "        ) " +
             "        AND r.\"hotel_id\" = :hotelId " +
-            "        AND r.\"kids\" >= 0 " +
-            "        AND r.\"adult\" >= 0 " +
+            "        AND r.\"kids\" >= :kids " +
+            "        AND r.\"adult\" >= :adult " +
             "    ) AS rooms " +
             "    INNER JOIN (" +
             "        WITH date_series AS (" +
@@ -66,6 +66,8 @@ public interface RoomRepository extends JpaRepository<Room, Integer>
             @Param("checkInDate") LocalDate checkInDate,
             @Param("checkOutDate") LocalDate checkOutDate,
             @Param("hotelId") int hotelId,
+            @Param("kids") int kids,
+            @Param("adult") int adult,
             @Param("pageNumber") int pageNumber,
             @Param("pageSize") int pageSize);
 
@@ -84,8 +86,8 @@ public interface RoomRepository extends JpaRepository<Room, Integer>
             "            AND :checkOutDate > res.\"check_in\" " +
             "        ) " +
             "        AND r.\"hotel_id\" = :hotelId " +
-            "        AND r.\"kids\" >= 0 " +
-            "        AND r.\"adult\" >= 0 " +
+            "        AND r.\"kids\" >= :kids " +
+            "        AND r.\"adult\" >= :adult " +
             "    ) AS rooms " +
             "    INNER JOIN (" +
             "        WITH date_series AS (" +
@@ -113,114 +115,11 @@ public interface RoomRepository extends JpaRepository<Room, Integer>
     LinkedList<Object[]> findAvailableRoomsByHotelIdAndDateRangeOrderDesc(
             @Param("checkInDate") LocalDate checkInDate,
             @Param("checkOutDate") LocalDate checkOutDate,
+            @Param("kids") int kids,
+            @Param("adult") int adult,
             @Param("hotelId") int hotelId,
             @Param("pageNumber") int pageNumber,
             @Param("pageSize") int pageSize);
-
-
-    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
-            "SELECT res.\"room_id\" FROM \"reservation\" res " +
-            "WHERE res.\"hotel_id\" = ?5 AND (?1 < res.\"check_out\" AND ?2 > res.\"check_in\") " +
-            "AND (r.\"kids\" = ?3 AND r.\"adult\" = ?4))" +
-            "AND r.\"hotel_id\" = ?5 AND r.\"kids\" >= ?3 AND r.\"adult\" >= ?4 ", nativeQuery = true)
-    Set<Room> findAvailableRoomsByHotelIdAndCalculateTotal(LocalDate checkInDate,
-                                          LocalDate checkOutDate,
-                                          int kids,
-                                          int adults,
-                                          int hotelId);
-
-
-    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
-            "SELECT res.\"room_id\" FROM \"reservation\" res " +
-            "WHERE res.\"hotel_id\" = ?5 AND (?1 < res.\"check_out\" AND ?2 > res.\"check_in\") " +
-            "AND (r.\"kids\" = ?3 AND r.\"adult\" = ?4))" +
-            "AND r.\"hotel_id\" = ?5 AND r.\"kids\" >= ?3 AND r.\"adult\" >= ?4 ", nativeQuery = true)
-    Set<Room> findAvailableRoomsByHotelId(LocalDate checkInDate,
-                                 LocalDate checkOutDate,
-                                 int kids,
-                                 int adults,
-                                 int hotelId);
-
-    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
-            "SELECT res.\"room_id\" FROM \"reservation\" res " +
-            "WHERE res.\"hotel_id\" = ?5 AND (?1 < res.\"check_out\" AND ?2 > res.\"check_in\") " +
-            "AND (r.\"kids\" = ?3 AND r.\"adult\" = ?4))" +
-            "AND r.\"hotel_id\" = ?5 AND r.\"kids\" >= ?3 AND r.\"adult\" >= ?4 ", nativeQuery = true)
-    Page<Room> findAvailableRoomsByHotelId(LocalDate checkInDate,
-                                          LocalDate checkOutDate,
-                                          int kids,
-                                          int adults,
-                                          int hotelId,
-                                          Pageable pageable);
-
-
-    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
-            "SELECT res.\"room_id\" FROM \"reservation\" res " +
-            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\") " +
-            "AND (r.\"kids\" = ?3 AND r.\"adult\" = ?4))", nativeQuery = true)
-    Set<Room> findAvailableRooms(LocalDate checkInDate,
-                                 LocalDate checkOutDate,
-                                 int kids,
-                                 int adults);
-
-    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
-            "SELECT res.\"room_id\" FROM \"reservation\" res " +
-            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\") " +
-            "AND (r.\"kids\" = ?3 AND r.\"adult\" = ?4))", nativeQuery = true)
-    Page<Room> findAvailableRooms(LocalDate checkInDate,
-                                  LocalDate checkOutDate,
-                                  int kids,
-                                  int adults,
-                                  Pageable pageable);
-
-    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
-            "SELECT res.\"room_id\" FROM \"reservation\" res " +
-            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\"))", nativeQuery = true)
-    Page<Room> findAvailableRooms(LocalDate checkInDate,
-                                 LocalDate checkOutDate,
-                                 Pageable pageable);
-
-    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
-            "SELECT res.\"room_id\" FROM \"reservation\" res " +
-            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\"))", nativeQuery = true)
-    Set<Room> findAvailableRooms(LocalDate checkInDate,
-                                 LocalDate checkOutDate);
-
-    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
-            "SELECT res.\"room_id\" FROM \"reservation\" res " +
-            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\") " +
-            "AND (r.\"kids\" = ?3))", nativeQuery = true)
-    Set<Room> findAvailableRooms(LocalDate checkInDate,
-                                 LocalDate checkOutDate,
-                                 int kids);
-
-    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
-            "SELECT res.\"room_id\" FROM \"reservation\" res " +
-            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\") " +
-            "AND (r.\"kids\" = ?3))", nativeQuery = true)
-    Page<Room> findAvailableRooms(LocalDate checkInDate,
-                                 LocalDate checkOutDate,
-                                 int kids,
-                                 Pageable pageable);
-
-    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
-            "SELECT res.\"room_id\" FROM \"reservation\" res " +
-            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\") " +
-            "AND (r.\"adult\" = ?4))", nativeQuery = true)
-    Page<Room> findAvailableRoomsWhenOnlyAdultPresent(
-                                 LocalDate checkInDate,
-                                 LocalDate checkOutDate,
-                                 int adults,
-                                 Pageable pageable);
-
-    @Query(value = "SELECT * FROM \"room\" r WHERE r.\"id\" not IN (" +
-            "SELECT res.\"room_id\" FROM \"reservation\" res " +
-            "WHERE (?1 < res.\"check_out\" AND ?2 > res.\"check_in\") " +
-            "AND (r.\"adult\" = ?4))", nativeQuery = true)
-    Set<Room> findAvailableRoomsWhenOnlyAdultPresent(
-            LocalDate checkInDate,
-            LocalDate checkOutDate,
-            int adults);
 
 
     @Query("SELECT r FROM Room r WHERE r.id NOT IN (" +

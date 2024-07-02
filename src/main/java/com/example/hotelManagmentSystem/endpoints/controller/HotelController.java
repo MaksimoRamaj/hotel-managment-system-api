@@ -33,7 +33,7 @@ public class HotelController {
         return new ResponseEntity<>(hotelService.addHotel(request,userEmail), HttpStatus.ACCEPTED);
     }
 
-
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @GetMapping("/all")
     public ResponseEntity<?> findAll(){
         return new ResponseEntity<>(
@@ -52,11 +52,12 @@ public class HotelController {
                 .findAllHotelsByUser(userEmail),HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/available")
     public ResponseEntity<?> checkAvailability(
             @RequestBody AvailabilityRequest request,
-            @RequestParam int pageNumber,
-            @RequestParam int pageSize
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "6") int pageSize
     ){
         return new ResponseEntity<>(
                 hotelService.findAvailableHotels(request,pageNumber,pageSize),

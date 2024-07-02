@@ -1,6 +1,7 @@
 package com.example.hotelManagmentSystem.dataproviders.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -25,18 +26,22 @@ public class Room {
     @JoinColumn(name = "hotel_id")
     private Hotel hotel;
 
+    @NotBlank(message = "Room type field must not be blank!")
     @Column(name = "type")
     private String type;
 
+    @NotBlank(message = "Number Of adults must be defined!")
     @Column(name = "adult")
     private Integer adult;
 
     @Column(name = "kids")
     private Integer kids;
 
+    @NotBlank(message = "Description field must not be blank!")
     @Column(name = "description", length = Integer.MAX_VALUE)
     private String description;
 
+    @NotBlank(message = "roomPrices field must not be blank!")
     @OneToMany(mappedBy = "room", fetch = FetchType.EAGER)
     private Set<RoomPrice> roomPrices;
 

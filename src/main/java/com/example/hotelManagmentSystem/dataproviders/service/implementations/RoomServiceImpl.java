@@ -48,7 +48,8 @@ public class RoomServiceImpl implements IRoomService {
     public RoomResponse addRoom(AddRoomRequest request,String userEmail) {
 
         User user = userRepository.findUserByEmail(userEmail).get();
-        Hotel hotel = hotelRepository.findById(request.getHotelId()).get();
+        Hotel hotel = hotelRepository.findById(request.getHotelId())
+                .orElseThrow(()->new InvalidRequestException("Hotel does not exists!"));
 
         if (!isPriceDayDtoValid(request.getPriceDayDto())){
             throw new InvalidRoomPriceException("Price should be > 0 or " +
@@ -59,9 +60,9 @@ public class RoomServiceImpl implements IRoomService {
             throw new InvalidRequestException("You should be the owner of the hotel to add the room!");
         }
 
-        if (request.getAdult() <= 0){
-            throw new InvalidRequestException("You should define the number of adults you expect in this room! > 0");
-        }
+//        if (request.getAdult() <= 0){
+//            throw new InvalidRequestException("You should define the number of adults you expect in this room! > 0");
+//        }
 
         Room room = Room.builder()
                 .adult(request.getAdult() )
@@ -111,16 +112,14 @@ public class RoomServiceImpl implements IRoomService {
                     "checkout!");
         }
 
-        Optional<Hotel> opHotel = hotelRepository.findById(hotelId);
-        if (opHotel.isEmpty()){
-            throw new InvalidRequestException("Hotel does not exists!");
-        }
-
         LinkedList<Object[]> rooms;
+
         if (order.equalsIgnoreCase("desc")){
             rooms = roomRepository.findAvailableRoomsByHotelIdAndDateRangeOrderDesc(
                     request.getCheckIn(),
-                    request.getCheckOut(),
+                    request.getCheckOut().minusDays(1),
+                    request.getKids() < 0 ? 0 : request.getKids(),
+                    request.getAdult() < 0 ? 0 : request.getAdult(),
                     hotelId,
                     pageNumber,
                     pageSize
@@ -128,7 +127,9 @@ public class RoomServiceImpl implements IRoomService {
         }else {
             rooms = roomRepository.findAvailableRoomsByHotelIdAndDateRange(
                     request.getCheckIn(),
-                    request.getCheckOut(),
+                    request.getCheckOut().minusDays(1),
+                    request.getKids() < 0 ? 0 : request.getKids(),
+                    request.getAdult() < 0 ? 0 : request.getAdult(),
                     hotelId,
                     pageNumber,
                     pageSize
@@ -147,7 +148,7 @@ public class RoomServiceImpl implements IRoomService {
                         .description((String) objects[5])
                         .total((Double) objects[6])
                         .noOfDays(ChronoUnit.DAYS.between(request.getCheckIn(),request.getCheckOut())+1)
-                        //.imageResponse(downloadFirstImageFromFileSystem((Integer) objects[0]))
+                        .imageResponse(downloadFirstImageFromFileSystem((Integer) objects[0]))
                         .build())
                 .collect(Collectors.toCollection(LinkedList::new));
 
