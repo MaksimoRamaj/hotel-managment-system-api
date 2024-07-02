@@ -6,6 +6,7 @@ import com.example.hotelManagmentSystem.dataproviders.repository.HotelRepository
 import com.example.hotelManagmentSystem.dataproviders.service.implementations.JwtService;
 import com.example.hotelManagmentSystem.dataproviders.service.interfaces.IHotelService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class HotelController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "/add",consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> addHotel(@ModelAttribute AddHotelRequest request,
+    public ResponseEntity<?> addHotel(@Valid @ModelAttribute AddHotelRequest request,
                                       @NonNull HttpServletRequest httpServletRequest){
             String authHeader = httpServletRequest.getHeader("Authorization");
         String jwtToken = authHeader.substring(7);
@@ -55,7 +56,7 @@ public class HotelController {
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/available")
     public ResponseEntity<?> checkAvailability(
-            @RequestBody AvailabilityRequest request,
+            @Valid @RequestBody AvailabilityRequest request,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "6") int pageSize
     ){

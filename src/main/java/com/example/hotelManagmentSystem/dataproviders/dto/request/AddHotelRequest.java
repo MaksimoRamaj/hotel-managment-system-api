@@ -20,7 +20,6 @@ public class AddHotelRequest {
     private String hotelName;
     @NotBlank(message = "hotelDesc field must not be blank!")
     private String hotelDesc;
-    @NotBlank(message = "taxRate field must not be blank!")
     private Double taxRate;
     Set<Integer> hotelServices;
     private Set<MultipartFile> multipartFiles;

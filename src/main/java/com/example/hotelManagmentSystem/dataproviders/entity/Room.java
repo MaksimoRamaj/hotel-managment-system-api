@@ -30,7 +30,6 @@ public class Room {
     @Column(name = "type")
     private String type;
 
-    @NotBlank(message = "Number Of adults must be defined!")
     @Column(name = "adult")
     private Integer adult;
 
@@ -41,7 +40,6 @@ public class Room {
     @Column(name = "description", length = Integer.MAX_VALUE)
     private String description;
 
-    @NotBlank(message = "roomPrices field must not be blank!")
     @OneToMany(mappedBy = "room", fetch = FetchType.EAGER)
     private Set<RoomPrice> roomPrices;
 

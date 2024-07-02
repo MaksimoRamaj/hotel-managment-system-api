@@ -5,6 +5,7 @@ import com.example.hotelManagmentSystem.dataproviders.dto.request.AvailabilityRe
 import com.example.hotelManagmentSystem.dataproviders.service.implementations.JwtService;
 import com.example.hotelManagmentSystem.dataproviders.service.interfaces.IRoomService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,7 +37,7 @@ public class RoomController {
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/available/{hotelId}")
     public ResponseEntity<?> getRoomByHotelId(@PathVariable Integer hotelId,
-                                              @RequestBody AvailabilityRequest request,
+                                              @Valid @RequestBody AvailabilityRequest request,
                                               @RequestParam int pageNumber,
                                               @RequestParam int pageSize,
                                               @RequestParam(defaultValue = "asc") String order){

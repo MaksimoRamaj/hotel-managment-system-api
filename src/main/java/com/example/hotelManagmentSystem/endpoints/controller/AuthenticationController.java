@@ -3,6 +3,7 @@ package com.example.hotelManagmentSystem.endpoints.controller;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AuthenticationRequest;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.RegisterRequest;
 import com.example.hotelManagmentSystem.dataproviders.service.interfaces.IUserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,14 +20,14 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(
-            @RequestBody RegisterRequest request
+          @Valid @RequestBody RegisterRequest request
     ){
         return iUserService.register(request);
     }
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(
-            @RequestBody AuthenticationRequest request
+          @Valid @RequestBody AuthenticationRequest request
     ){
         return iUserService.authenticate(request);
     }

@@ -1,5 +1,6 @@
 package com.example.hotelManagmentSystem.dataproviders.service.implementations;
 
+import com.example.hotelManagmentSystem.core.exceptions.BookingException;
 import com.example.hotelManagmentSystem.core.exceptions.InvalidRequestException;
 import com.example.hotelManagmentSystem.core.exceptions.InvalidRoomPriceException;
 import com.example.hotelManagmentSystem.core.exceptions.UploadImageException;
@@ -60,9 +61,9 @@ public class RoomServiceImpl implements IRoomService {
             throw new InvalidRequestException("You should be the owner of the hotel to add the room!");
         }
 
-//        if (request.getAdult() <= 0){
-//            throw new InvalidRequestException("You should define the number of adults you expect in this room! > 0");
-//        }
+        if (request.getAdult() <= 0){
+            throw new InvalidRequestException("You should define the number of adults you expect in this room! > 0");
+        }
 
         Room room = Room.builder()
                 .adult(request.getAdult() )
@@ -128,14 +129,17 @@ public class RoomServiceImpl implements IRoomService {
             rooms = roomRepository.findAvailableRoomsByHotelIdAndDateRange(
                     request.getCheckIn(),
                     request.getCheckOut().minusDays(1),
+                    hotelId,
                     request.getKids() < 0 ? 0 : request.getKids(),
                     request.getAdult() < 0 ? 0 : request.getAdult(),
-                    hotelId,
                     pageNumber,
                     pageSize
             );
         }
 
+        if (rooms.isEmpty()){
+            throw new BookingException("There are no rooms available!");
+        }
 
         return rooms.stream().map(objects ->
                 RoomOfHotelResponse

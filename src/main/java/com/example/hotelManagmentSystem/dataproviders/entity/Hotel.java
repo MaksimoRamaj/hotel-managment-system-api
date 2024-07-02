@@ -39,7 +39,6 @@ public class Hotel {
     @OneToMany(mappedBy = "hotel")
     private Set<HotelService> hotelServices = new LinkedHashSet<>();
 
-    @NotBlank(message = "Tax-Rate field must not be blank!")
     @Column(name = "tax_rate")
     private Double taxRate;
 

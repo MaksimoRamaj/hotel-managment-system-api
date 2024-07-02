@@ -1,4 +1,4 @@
-package com.example.hotelManagmentSystem.dataproviders.dto.request;
+package com.example.hotelManagmentSystem.dataproviders.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

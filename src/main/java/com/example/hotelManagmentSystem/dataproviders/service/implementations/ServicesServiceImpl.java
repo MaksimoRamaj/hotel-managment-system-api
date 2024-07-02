@@ -1,13 +1,11 @@
 package com.example.hotelManagmentSystem.dataproviders.service.implementations;
 
-import com.example.hotelManagmentSystem.dataproviders.dto.request.ServiceResponse;
-import com.example.hotelManagmentSystem.dataproviders.entity.Service;
+import com.example.hotelManagmentSystem.dataproviders.dto.response.ServiceResponse;
 import com.example.hotelManagmentSystem.dataproviders.repository.ServiceRepository;
 import com.example.hotelManagmentSystem.dataproviders.service.interfaces.IServicesService;
 
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
