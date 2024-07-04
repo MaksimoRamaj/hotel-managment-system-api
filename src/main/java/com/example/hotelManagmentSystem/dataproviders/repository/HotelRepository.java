@@ -20,6 +20,8 @@ import java.util.Set;
 public interface HotelRepository extends JpaRepository<Hotel, Integer> {
     List<Hotel> findAllByAdmin_Id(Integer adminId);
 
+    List<Hotel> findAllByNameAndAdmin_Email(String name,String adminEmail);
+
     @Query("SELECT r.hotel, COUNT(r) " +
             "FROM Room r " +
             "WHERE r.id NOT IN (" +

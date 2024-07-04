@@ -235,7 +235,8 @@ public class RoomServiceImpl implements IRoomService {
             String filePath = fileData.getUrl();
             try {
                 imageResponses.add(ImageResponse.builder()
-                        .image(Files.readAllBytes(new File(filePath).toPath()))
+                        .image(Base64.getEncoder().encodeToString(
+                                Files.readAllBytes(new File(filePath).toPath())))
                         .imageName(fileData.getName())
                         .message(fileData.getUrl()).build());
             } catch (IOException e) {
@@ -256,7 +257,9 @@ public class RoomServiceImpl implements IRoomService {
             String filePath = fileData.getUrl();
             try {
                 imageResponses.add(ImageResponse.builder()
-                        .image(Files.readAllBytes(new File(filePath).toPath()))
+                        .image( Base64.getEncoder()
+                                .encodeToString(
+                                        Files.readAllBytes(new File(filePath).toPath())))
                         .imageName(fileData.getName())
                         .message(fileData.getUrl()).build());
             } catch (IOException e) {
@@ -279,7 +282,10 @@ public class RoomServiceImpl implements IRoomService {
                     filePath = "src/main/resources/images/dummyPicture.png";
                 try {
                     imageResponse = ImageResponse.builder()
-                            .image(Files.readAllBytes(new File(filePath).toPath()))
+                            .image(
+                                    Base64.getEncoder()
+                                            .encodeToString(
+                                                    Files.readAllBytes(new File(filePath).toPath())))
                             .imageName("dummyPicture!")
                             .message("dummyPicture.jpg").build();
                 } catch (IOException e) {
@@ -293,7 +299,9 @@ public class RoomServiceImpl implements IRoomService {
                 filePath = roomImages.getUrl();
                 try {
                     imageResponse = ImageResponse.builder()
-                            .image(Files.readAllBytes(new File(filePath).toPath()))
+                            .image(Base64.getEncoder()
+                                    .encodeToString(
+                                            Files.readAllBytes(new File(filePath).toPath())))
                             .imageName(roomImages.getName())
                             .message(roomImages.getUrl()).build();
                 } catch (IOException e) {

@@ -8,7 +8,7 @@ import lombok.Data;
 @AllArgsConstructor
 @Data
 public class ImageResponse {
-    private byte[] image;
+    private String image;
     private String imageName;
     private String message;
 }

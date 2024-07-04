@@ -1,6 +1,8 @@
 package com.example.hotelManagmentSystem.endpoints.controller;
 
 import com.example.hotelManagmentSystem.dataproviders.dto.request.BookRequest;
+import com.example.hotelManagmentSystem.dataproviders.dto.response.ReservationHistoryResponse;
+import com.example.hotelManagmentSystem.dataproviders.dto.response.ReservationResponse;
 import com.example.hotelManagmentSystem.dataproviders.service.implementations.JwtService;
 import com.example.hotelManagmentSystem.dataproviders.service.interfaces.IReservationService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+
 @RestController
 @RequestMapping("/api/reservation")
 @RequiredArgsConstructor
@@ -22,8 +26,8 @@ public class ReservationController {
 
     @PreAuthorize("hasRole('USER')")
     @PostMapping
-    public ResponseEntity<?> book(@Valid @RequestBody BookRequest request,
-                                  @NonNull HttpServletRequest httpServletRequest){
+    public ResponseEntity<ReservationResponse> book(@Valid @RequestBody BookRequest request,
+                                                    @NonNull HttpServletRequest httpServletRequest){
         String authHeader = httpServletRequest.getHeader("Authorization");
         String jwtToken = authHeader.substring(7);
         String userEmail = jwtService.extractUsername(jwtToken);
@@ -35,7 +39,7 @@ public class ReservationController {
 
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/history")
-    public ResponseEntity<?> getAllUserReservations(
+    public ResponseEntity<Set<ReservationHistoryResponse>> getAllUserReservations(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @NonNull HttpServletRequest httpServletRequest){

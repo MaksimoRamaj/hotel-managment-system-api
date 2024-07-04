@@ -14,5 +14,5 @@ import java.util.Set;
 @Setter
 public class PriceDayDto {
     private DayOfWeek dayOfWeek;
-    private double price;
+    private Double price;
 }

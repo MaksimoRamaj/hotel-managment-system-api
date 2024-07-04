@@ -2,6 +2,8 @@ package com.example.hotelManagmentSystem.endpoints.controller;
 
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AddRoomRequest;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AvailabilityRequest;
+import com.example.hotelManagmentSystem.dataproviders.dto.response.RoomOfHotelResponse;
+import com.example.hotelManagmentSystem.dataproviders.dto.response.RoomResponse;
 import com.example.hotelManagmentSystem.dataproviders.service.implementations.JwtService;
 import com.example.hotelManagmentSystem.dataproviders.service.interfaces.IRoomService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedList;
+
 @RestController
 @RequestMapping("/api/room")
 @RequiredArgsConstructor
@@ -25,7 +29,7 @@ public class RoomController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "/add" ,consumes = MediaType.MULTIPART_FORM_DATA_VALUE
             ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> addRoom(@ModelAttribute AddRoomRequest request,@NonNull HttpServletRequest httpServletRequest){
+    public ResponseEntity<RoomResponse> addRoom(@ModelAttribute AddRoomRequest request, @NonNull HttpServletRequest httpServletRequest){
         String authHeader = httpServletRequest.getHeader("Authorization");
         String jwtToken = authHeader.substring(7);
         String userEmail = jwtService.extractUsername(jwtToken);
@@ -36,11 +40,11 @@ public class RoomController {
 
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/available/{hotelId}")
-    public ResponseEntity<?> getRoomByHotelId(@PathVariable Integer hotelId,
-                                              @Valid @RequestBody AvailabilityRequest request,
-                                              @RequestParam int pageNumber,
-                                              @RequestParam int pageSize,
-                                              @RequestParam(defaultValue = "asc") String order){
+    public ResponseEntity<LinkedList<RoomOfHotelResponse>> getRoomByHotelId(@PathVariable Integer hotelId,
+                                                                           @Valid @RequestBody AvailabilityRequest request,
+                                                                           @RequestParam int pageNumber,
+                                                                           @RequestParam int pageSize,
+                                                                           @RequestParam(defaultValue = "asc") String order){
         return new ResponseEntity<>(
                 roomService.getRoomByHotelId(hotelId,request,pageNumber,pageSize,order),
                 HttpStatus.OK

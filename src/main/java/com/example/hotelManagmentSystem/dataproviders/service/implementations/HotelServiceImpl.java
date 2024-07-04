@@ -49,6 +49,10 @@ public class HotelServiceImpl implements IHotelService {
 
         User user = userRepository.findUserByEmail(userEmail).get();
 
+        if (!hotelRepository.findAllByNameAndAdmin_Email(addHotelRequest.getHotelName(),userEmail).isEmpty()){
+            throw new InvalidRequestException("You have already added an hotel with the same name!");
+        }
+
         Hotel hotelToAdd = Hotel
                 .builder()
                 .name(addHotelRequest.getHotelName())
@@ -177,6 +181,7 @@ public class HotelServiceImpl implements IHotelService {
                 .hotelServices(mapHotelServicesToHotelServiceResponses(hotel.getHotelServices()))
                 .currentPage(page.getNumber())
                 .totalPageNumber(page.getTotalPages())
+                .images(downloadImageFromFileSystem(hotel.getId()))
                 .build();
     }
 
@@ -210,7 +215,8 @@ public class HotelServiceImpl implements IHotelService {
             String filePath = fileData.getUrl();
             try {
                 imageResponses.add(ImageResponse.builder()
-                        .image(Files.readAllBytes(new File(filePath).toPath()))
+                        .image(Base64.getEncoder().encodeToString(
+                                Files.readAllBytes(new File(filePath).toPath())))
                         .imageName(fileData.getName())
                         .message(fileData.getUrl()).build());
             } catch (IOException e) {

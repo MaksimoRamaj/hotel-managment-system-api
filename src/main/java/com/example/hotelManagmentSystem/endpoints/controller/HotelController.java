@@ -2,6 +2,7 @@ package com.example.hotelManagmentSystem.endpoints.controller;
 
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AddHotelRequest;
 import com.example.hotelManagmentSystem.dataproviders.dto.request.AvailabilityRequest;
+import com.example.hotelManagmentSystem.dataproviders.dto.response.HotelResponse;
 import com.example.hotelManagmentSystem.dataproviders.repository.HotelRepository;
 import com.example.hotelManagmentSystem.dataproviders.service.implementations.JwtService;
 import com.example.hotelManagmentSystem.dataproviders.service.interfaces.IHotelService;
@@ -15,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+
 @RestController
 @RequestMapping("api/hotel")
 @RequiredArgsConstructor
@@ -26,7 +29,7 @@ public class HotelController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "/add",consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> addHotel(@Valid @ModelAttribute AddHotelRequest request,
+    public ResponseEntity<HotelResponse> addHotel(@Valid @ModelAttribute AddHotelRequest request,
                                       @NonNull HttpServletRequest httpServletRequest){
             String authHeader = httpServletRequest.getHeader("Authorization");
         String jwtToken = authHeader.substring(7);
@@ -36,7 +39,7 @@ public class HotelController {
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @GetMapping("/all")
-    public ResponseEntity<?> findAll(){
+    public ResponseEntity<Set<HotelResponse>> findAll(){
         return new ResponseEntity<>(
                 hotelService.findAll(),
                 HttpStatus.OK
@@ -45,7 +48,7 @@ public class HotelController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all-by-user")
-    public ResponseEntity<?> getAllByUserId(@NonNull HttpServletRequest httpServletRequest){
+    public ResponseEntity<Set<HotelResponse>> getAllByUserId(@NonNull HttpServletRequest httpServletRequest){
         String authHeader = httpServletRequest.getHeader("Authorization");
         String jwtToken = authHeader.substring(7);
         String userEmail = jwtService.extractUsername(jwtToken);
@@ -55,7 +58,7 @@ public class HotelController {
 
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/available")
-    public ResponseEntity<?> checkAvailability(
+    public ResponseEntity<Set<HotelResponse>> checkAvailability(
             @Valid @RequestBody AvailabilityRequest request,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "6") int pageSize
