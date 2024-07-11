@@ -33,7 +33,8 @@ public class GlobalExceptionHandler {
             HttpMessageNotReadableException httpMessageNotReadableException
     ){
         ResourceException resourceException = ResourceException.builder()
-                .message("JSON/Request wrong format! " + httpMessageNotReadableException.getMessage().substring(0,72))
+                .message("JSON/Request wrong format! " + httpMessageNotReadableException.getMessage().substring(0,72) + "" +
+                        "Supported Date format YYYY-MM-DD !")
                 .build();
 
         return new ResponseEntity<>(resourceException,HttpStatus.BAD_REQUEST);
