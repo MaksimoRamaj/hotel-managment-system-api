@@ -51,6 +51,14 @@ public class RoomController {
         );
     }
 
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/{roomId}")
+    public ResponseEntity<RoomResponse> getRoom(@PathVariable int roomId){
+        return new ResponseEntity<>(
+                roomService.getRoomByRoomId(roomId),HttpStatus.OK
+        );
+    }
+
 
 
 }

@@ -133,4 +133,6 @@ public interface RoomRepository extends JpaRepository<Room, Integer>
             @Param("kids") int kids,
             @Param("roomId") int roomId);
 
+    Optional<Room> findRoomById(int roomId);
+
 }

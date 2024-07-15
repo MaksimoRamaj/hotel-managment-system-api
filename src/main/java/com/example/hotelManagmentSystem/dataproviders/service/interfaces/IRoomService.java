@@ -15,4 +15,6 @@ public interface IRoomService {
     LinkedList<RoomOfHotelResponse> getRoomByHotelId(Integer hotelId, AvailabilityRequest request
     ,int pageNumber,int pageSize,String order);
 
+    RoomResponse getRoomByRoomId(int roomId);
+
 }

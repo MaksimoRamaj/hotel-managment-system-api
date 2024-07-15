@@ -158,6 +158,11 @@ public class RoomServiceImpl implements IRoomService {
 
     }
 
+    @Override
+    public RoomResponse getRoomByRoomId(int roomId) {
+        return mapToRoomResponse(roomRepository.findRoomById(roomId).orElseThrow());
+    }
+
 
     private RoomResponse mapToRoomResponse(Room room){
 
