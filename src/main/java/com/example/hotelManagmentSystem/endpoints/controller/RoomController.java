@@ -44,9 +44,13 @@ public class RoomController {
                                                                            @Valid @RequestBody AvailabilityRequest request,
                                                                            @RequestParam int pageNumber,
                                                                            @RequestParam int pageSize,
-                                                                           @RequestParam(defaultValue = "asc") String order){
+                                                                           @RequestParam(defaultValue = "asc") String order,
+                                                                            @NonNull HttpServletRequest httpServletRequest){
+        String authHeader = httpServletRequest.getHeader("Authorization");
+        String jwtToken = authHeader.substring(7);
+        String userEmail = jwtService.extractUsername(jwtToken);
         return new ResponseEntity<>(
-                roomService.getRoomByHotelId(hotelId,request,pageNumber,pageSize,order),
+                roomService.getRoomByHotelId(hotelId,request,pageNumber,pageSize,order,userEmail),
                 HttpStatus.OK
         );
     }

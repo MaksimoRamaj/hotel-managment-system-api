@@ -13,6 +13,6 @@ public interface IRoomService {
     RoomResponse addRoom(AddRoomRequest request,String userEmail);
 
     LinkedList<RoomOfHotelResponse> getRoomByHotelId(Integer hotelId, AvailabilityRequest request
-    ,int pageNumber,int pageSize,String order);
+    ,int pageNumber,int pageSize,String order,String userEmail);
 
 }
