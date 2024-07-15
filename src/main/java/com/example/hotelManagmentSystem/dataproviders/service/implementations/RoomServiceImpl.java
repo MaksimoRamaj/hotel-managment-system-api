@@ -160,6 +160,11 @@ public class RoomServiceImpl implements IRoomService {
 
     }
 
+    @Override
+    public RoomResponse getRoomByRoomId(int roomId) {
+        return mapToRoomResponse(roomRepository.findRoomById(roomId).orElseThrow());
+    };
+
     //vlera qe kthehet p.sh 31.0 => si 31$ jo 31%
     private double calculateDiscount(double total,String userEmail) {
         User user = userRepository.findUserByEmail(userEmail).orElseThrow();
