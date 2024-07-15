@@ -19,5 +19,6 @@ public class RoomOfHotelResponse {
     private String description;
     private double total;
     private long noOfDays;
+    private double discount;
     private ImageResponse imageResponse;
 }

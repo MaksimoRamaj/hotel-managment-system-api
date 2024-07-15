@@ -103,7 +103,7 @@ public class RoomServiceImpl implements IRoomService {
 
     @Override
     public LinkedList<RoomOfHotelResponse> getRoomByHotelId(Integer hotelId, AvailabilityRequest request,
-                                                     int pageNumber,int pageSize,String order) {
+                                                     int pageNumber,int pageSize,String order,String userEmail) {
 
         if (request.getCheckIn().isBefore(LocalDate.now())){
             throw new InvalidRequestException("Booking not valid!");
@@ -151,16 +151,36 @@ public class RoomServiceImpl implements IRoomService {
                         .kids((Integer)objects[4])
                         .description((String) objects[5])
                         .total((Double) objects[6])
-                        .noOfDays(ChronoUnit.DAYS.between(request.getCheckIn(),request.getCheckOut())+1)
+                        .discount(calculateDiscount((Double) objects[6],userEmail))
+                        .noOfDays(ChronoUnit.DAYS.between(request.getCheckIn(),request.getCheckOut()))
                         .imageResponse(downloadFirstImageFromFileSystem((Integer) objects[0]))
+                        .discount(calculateDiscount((Double) objects[6],userEmail))
                         .build())
                 .collect(Collectors.toCollection(LinkedList::new));
 
     }
 
-    @Override
-    public RoomResponse getRoomByRoomId(int roomId) {
-        return mapToRoomResponse(roomRepository.findRoomById(roomId).orElseThrow());
+    //vlera qe kthehet p.sh 31.0 => si 31$ jo 31%
+    private double calculateDiscount(double total,String userEmail) {
+        User user = userRepository.findUserByEmail(userEmail).orElseThrow();
+        double userScore = user.getClientLog().getScore();
+
+        Random random = new Random();
+
+        if (userScore > (total * 0.3) && userScore <= (total * 0.4)){
+            return random.nextInt((int)(total *0.3), (int) userScore);
+        } else if (userScore > (total * 0.2) && userScore <= (total * 0.3)){
+            return random.nextInt((int)(total *0.2),(int) userScore);
+        }else if (userScore > (total * 0.1) && userScore <= (total * 0.2)){
+            return random.nextInt((int)(total *0.1),(int) userScore);
+        }
+
+        return 0;
+    }
+
+    private double caclulateTotalAfterTax(Double total,int hotelId) {
+        Hotel hotel = hotelRepository.findById(hotelId).orElseThrow();
+        return total + (total * (hotel.getTaxRate()/100));
     }
 
 

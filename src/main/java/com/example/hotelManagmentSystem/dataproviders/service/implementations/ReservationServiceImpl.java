@@ -136,13 +136,13 @@ public class ReservationServiceImpl implements IReservationService {
         if (request.getDiscount() != 0) {
             //nese eshte aplikuar discount
             //kontrollo nese useri i ka piket per te perfituar 10% discount
-            if (user.getClientLog().getScore() < netValue * 0.1){
+            if (user.getClientLog().getScore() < request.getDiscount()){
                 throw new BookingException("Useri nuk ka mjaftushem pike " +
                         "per te perfituar discount!");
             }
             //nese e perfiton discount kontrollo nese vlera eshte e sakte
-            if (request.getDiscount() > (netValue *0.1)){
-                throw new BookingException("Useri nuk mund te perfitoj me shume se 10% discount");
+            if (request.getDiscount() > (netValue *0.4)){
+                throw new BookingException("Nuk mund te perfitohet me shume se 40% discount");
             }
             //nese e ka perfituar sakte
             user.getClientLog().setScore(user.getClientLog().getScore()- request.getDiscount());
@@ -150,8 +150,8 @@ public class ReservationServiceImpl implements IReservationService {
             netValue -= request.getDiscount();
             reservation.setDiscount(request.getDiscount());
         }else {
-            //ne rast te kundert perfito score 3% te vleres neto
-            user.getClientLog().setScore(user.getClientLog().getScore()+(netValue *0.03));
+            //ne rast te kundert perfito score 5% te vleres neto
+            user.getClientLog().setScore(user.getClientLog().getScore()+(netValue *0.05));
         }
         return netValue;
     }
